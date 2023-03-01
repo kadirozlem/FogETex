@@ -1,0 +1,32 @@
+var DeviceTypes = {
+    User: 0,
+    Cloud: 1,
+    Broker: 2,
+    Worker: 3,
+    UserInterface: 4,
+
+    GetDeviceName: (deviceType) => {
+        switch (deviceType) {
+            case DeviceTypes.User:
+                return 'User';
+            case DeviceTypes.Cloud:
+                return 'Cloud';
+            case DeviceTypes.Broker:
+                return 'Broker';
+            case DeviceTypes.Worker:
+                return 'Worker';
+            case DeviceTypes.UserInterface:
+                return 'User Interface';
+        }
+    }
+}
+
+module.exports = {
+    CloudIp: '164.92.168.129',
+    Delimiter: ";",
+    RM_SamplingPeriod: 1000,         //Resource Manager Sampling Period
+    RM_BufferSize: 100,             // Resource Manager Buffer Sizew
+    Port: 27592,
+    DeviceType: DeviceTypes.Cloud,
+    DeviceTypes: DeviceTypes
+};

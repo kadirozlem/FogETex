@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="bf681dba-0aa6-4df5-8b00-1d53c169b32c" name="164.92.168.129" url="http://164.92.168.129:27592">
+        <fileTransfer rootFolder="/home/FogETex" accessType="SFTP" host="164.92.168.129" port="22" sshConfigId="d52fca38-40a4-4533-bfed-fb24ea17e097" sshConfig="root@164.92.168.129:22 password">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" keepAliveTimeout="0" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

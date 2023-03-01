@@ -1,0 +1,23 @@
+#Update Packages
+sudo apt update
+
+#Install Node JS
+sudo apt install nodejs
+
+#Check NodeJS version
+node -v
+
+#Install Node Package Manager
+sudo apt install npm
+
+#Install All Modules For Project
+npm install
+
+#Install Forever Module
+npm install forever -g
+
+#Install Forever Monitor Module
+npm install forever-monitor
+
+#Run Application
+forever start Server.js
