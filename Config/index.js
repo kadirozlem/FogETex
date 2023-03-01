@@ -21,12 +21,17 @@ var DeviceTypes = {
     }
 }
 
+
+
 module.exports = {
     CloudIp: '164.92.168.129',
     Delimiter: ";",
     RM_SamplingPeriod: 1000,         //Resource Manager Sampling Period
     RM_BufferSize: 100,             // Resource Manager Buffer Sizew
     Port: 27592,
+    WorkerCPULimit:0.7,
+    WorkerMemoryLimit : 0.7,
+    UserPackageDirectory: "./UserPackage/",
     DeviceType: DeviceTypes.Cloud,
     DeviceTypes: DeviceTypes
 };

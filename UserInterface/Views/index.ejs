@@ -31,7 +31,98 @@
             <section id="main-content">
 
                 <!-- /# row -->
+                <div class="row">
+                    <div class="col-lg-6 col-md-6 col-sm12">
+                        <div class="card alert">
+                            <div class="card-title">
+                                <h4><i class="fa fa-area-chart"></i>Device Information</h4>
+                            </div>
+                            <div class="device_information">
+                                <table class="table">
+                                    <tbody>
+                                    <tr>
+                                        <td>
+                                            <% if(DeviceInfo.DeviceTypeString=='Cloud'){ %>
+                                            <i class="fa-solid fa-cloud"></i>
+                                                <% } else{ %>
+                                                    <i class="fa-brands fa-raspberry-pi"></i>
 
+                                                <% } %>
+                                        </td>
+                                        <td>Device Type</td>
+                                        <td><%= DeviceInfo.DeviceTypeString%></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa-solid fa-globe"></i></td>
+                                        <td>Global IP</td>
+                                        <td><%= DeviceInfo.PublicIp%></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa-solid fa-network-wired"></i></td>
+                                        <td>Local IP</td>
+                                        <td><%= DeviceInfo.LocalIp%></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa-solid fa-globe-africa"></i></td>
+                                        <td>Continent</td>
+                                        <td><%= DeviceInfo.Continent%></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa-solid fa-flag"></i></td>
+                                        <td>Country</td>
+                                        <td><%= DeviceInfo.Country%></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa-solid fa-city"></i></td>
+                                        <td>City</td>
+                                        <td><%= DeviceInfo.City%></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa-solid fa-clock"></i></td>
+                                        <td>Timezone</td>
+                                        <td><%= DeviceInfo.Timezone%></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa-solid fa-map-location-dot"></i></td>
+                                        <td>Location</td>
+                                        <td><%= DeviceInfo.Location.join(', ')%></td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <% if(DeviceInfo.SystemInformation.OperatingSystem.Platform=='darwin'){ %>
+                                                <i class="fa-brands fa-apple"></i>
+                                            <% } else if(DeviceInfo.SystemInformation.OperatingSystem.Platform=='win32'){ %>
+                                                <i class="fa-brands fa-windows"></i>
+                                                <% } else{ %>
+                                                    <i class="fa-brands fa-linux"></i>
+                                            <% } %>
+                                        </td>
+                                        <td>Operating System</td>
+                                        <td><%= DeviceInfo.SystemInformation.OperatingSystem.Type+ ' / '+
+                                            DeviceInfo.SystemInformation.OperatingSystem.Platform+ ' / '+
+                                            DeviceInfo.SystemInformation.OperatingSystem.Release%></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa-solid fa-microchip"></i></td>
+                                        <td>CPUs</td>
+                                        <td><%- DeviceInfo.SystemInformation.CPUs.string %></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa-solid fa-memory"></i></td>
+                                        <td>Memory</td>
+                                        <td><%= (DeviceInfo.SystemInformation.Memory/Math.pow(2, 30)).toFixed(2) %> GB</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa-solid fa-hard-drive"></i></td>
+                                        <td>Hard Drive</td>
+                                        <td><%- DeviceInfo.SystemInformation.Disk.diskString %></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="row">
                     <div class="col-lg-8">
                         <div class="card alert">
@@ -82,10 +173,10 @@
                             <div class="stat-widget-two">
                                 <div class="stat-content">
                                     <div class="stat-text"><i class="fa fa-child"></i>  Steps This Week</div>
-                                    <div class="stat-digit"><%= (deviceInfo.SystemInformation.Memory/Math.pow(2, 30)).toFixed(2) %> GB</div>
+                                    <div class="stat-digit"><%= (DeviceInfo.SystemInformation.Memory/Math.pow(2, 30)).toFixed(2) %> GB</div>
                                 </div>
                                 <div class="progress">
-                                    <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuenow="8264984" aria-valuemin="0" aria-valuemax="<%= deviceInfo.SystemInformation.Memory/Math.pow(2, 10) %>"></div>
+                                    <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuenow="8264984" aria-valuemin="0" aria-valuemax="<%= DeviceInfo.SystemInformation.Memory/Math.pow(2, 10) %>"></div>
                                 </div>
                             </div>
                         </div>
@@ -107,7 +198,7 @@
                     <!-- /# column -->
                 </div>
                 <div>
-                    <%= JSON.stringify(deviceInfo) %>
+                    <%= JSON.stringify(DeviceInfo) %>
                 </div>
 
                 <div class="row" id="website_footer">
@@ -123,155 +214,7 @@
     </div>
 </div>
 
-<div class="modal fade" tabindex="-1" role="dialog" id="settings_modal">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Settings</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <table class="table center">
-                    <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Operation</th>
-                        <th scope="col" style="text-align: center">Action</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <th scope="row">1</th>
-                        <td>Editable Charts</td>
-                        <td style="text-align: center">
-                            <button id="enableEditable" class="btn btn-success" data-status="enable">Enable</button>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="modal-footer">
-                <!--                <button type="button" class="btn btn-primary">Save changes</button>-->
-                <button type="button" class="btn btn-secondary close-btn" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
 
-<div class="modal fade" tabindex="-1" role="dialog" id="history_modal">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Historical Data</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="table-responsive">
-                    <table id="historyTable" data-toggle="table">
-                        <thead>
-                        <tr>
-                            <th data-field="no" data-sortable="true">No</th>
-                            <th data-field="portname" data-sortable="true">Port Name</th>
-                            <th data-field="sensorcount" data-sortable="true">Sensor Count</th>
-                            <th data-field="startdate" data-sortable="true">Date</th>
-                            <th data-field="duration" data-sortable="true">Duration</th>
-                            <th data-field="operation">Operations</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr>
-                            <td>1</td>
-                            <td>Item 1</td>
-                            <td>$1</td>
-                        </tr>
-                        <tr>
-                            <td>2</td>
-                            <td>Item 2</td>
-                            <td>$2</td>
-                        </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <!--                <button type="button" class="btn btn-primary">Save changes</button>-->
-                <button type="button" class="btn btn-secondary close-btn" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="modal" id="deleteHistoricalData" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content" style="border-width: 10px;">
-            <div class="modal-header">
-                <h5 class="modal-title">Warning</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>The data will be deleted permanently and cannot be recovered. Are you sure you want to delete this
-                    item?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" id="deletePermemanentlyBtn" class="btn btn-danger" data-id="">Delete</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-<div class="modal fade" tabindex="-1" role="dialog" id="replay_modal">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content" style="border-width: 10px;">
-            <div class="modal-header">
-                <h5 class="modal-title">Replay Start Options</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <table class="table center">
-                    <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Operation</th>
-                        <th scope="col" style="text-align: center">Action</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr>
-                        <th scope="row">1</th>
-                        <td>Circular</td>
-                        <td style="text-align: center">
-                            <label class="toogleswitch">
-                                <input type="checkbox" id="isCircularCheckbox" checked>
-                                <span class="toogleslider round"></span>
-                            </label>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-                <h6 style="text-align: center">Start / Stop Time </h6>
-                <div id="duration_picker" style="padding-right: 10px; padding-left: 10px;">
-
-                </div>
-                <div style="margin-top: 5px;">
-                    <div class="" id="picker_start_time" style="display: inline;">00:00:00</div>
-                    <div id="picker_end_time" style="display: inline;float:right;">00:01:40</div>
-                </div>
-            </div>
-            <input type="hidden" id="replayDataID" value="-1">
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="startReplayOperationBtn">Save changes</button>
-                <button type="button" class="btn btn-secondary close-btn" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
 <%- include('./partials/footer') %>
 
 <div id="loadingDiv" class="cssload-container">
@@ -285,6 +228,25 @@
 
 
 <!--<script src="/javascripts/helper.js"></script>-->
+<script>
+    CircleProgress=function (name,color="#a389d5",size=100){
+        $('#info-circle-card').circleProgress({
+            value: 0.70,
+            size: 100,
+            fill: {
+                gradient: ["#a389d5"]
+            }
+        });
+
+        this.Change=function (value){
+            $(name).circleProgress({value:value,animationStartValue:$(name).circleProgress('value')})
+        }
+    }
+
+    circleprogress=new CircleProgress('#info-circle-card');
+
+</script>
+
 <script>
     $('#enableEditable').on('click', function () {
         var obj = $(this);
@@ -872,11 +834,14 @@
 </script>
 <!--Script Area-->
 <script>
-    socket = io('http://localhost:27592');
+    socket = io('/',{query: {
+        DeviceType:"<%= UserType %>",
+        Directory:"<%= Directory %>"
+    }});
     socket.on('connect', function () {
         console.log('connected');
         $('#connectionIcon').removeClass('disconnect').addClass('connect');
-        $('#connectionIcon').data('content', 'API connected!').attr('data-content', 'API connected');
+        $('#connectionIcon').data('content', 'Device is connected!').attr('data-content', 'Device connected');
         socket.emit('control', new SocketCodes.InitialConfiguration([]));
     });
     //  socket = io('https://'+window.location.hostname+':'+window.location.port);
@@ -890,9 +855,14 @@
 
     socket.on('disconnect', function () {
         $('#connectionIcon').removeClass('connect').addClass('disconnect');
-        $('#connectionIcon').data('content', 'API disconnected!').attr('data-content', 'API disconnected');
+        $('#connectionIcon').data('content', 'Device is disconnected!').attr('data-content', 'Device is disconnected');
 
     });
+
+    socket.on('resource_info', function (info){
+        console.log(info);
+        circleprogress.Change(info.cpu_percentage.total.usage/100);
+    })
 
     socket.on('news', function (data) {
         console.log(data);

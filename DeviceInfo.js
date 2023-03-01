@@ -5,6 +5,7 @@ const Config = require("./Config");
 const os = require("os");
 const nodeDiskInfo = require('node-disk-info');
 const {getDiskInfoSync} = require("node-disk-info");
+const lookup = require('country-code-lookup')
 const {DeviceTypes} = require("./Config");
 
 function getPublicIP() {
@@ -40,37 +41,48 @@ function GetCPUInfo() {
             let obj = cpu_dict[key] = {model: element.model, speed: element.speed, count: 1}
             arr.push(obj)
         }
-    })
-    return arr;
+    });
+    arr.sort((a,b)=>a-b);
+    let cpu_Strings=[]
+    arr.forEach(element=>{
+        cpu_Strings.push(element.count + ' x '+ element.model)
+    });
+
+    return {array: arr, string: cpu_Strings.join("<br />")};
 }
 
 function GetDiskInfo() {
     const disks = nodeDiskInfo.getDiskInfoSync();
     const diskInfo = []
+    const diskStrings=[]
     for (const disk of disks) {
-        diskInfo.push({
+        const obj ={
             FileSystem: disk.filesystem,
             Blocks: disk.blocks,
             Used: disk.used,
             Available: disk.available,
             Capacity: disk.capacity,
-            Mounted: disk.mounted
-        });
+            Mounted: disk.mounted,
+            String: disk.filesystem+ '('+disk.mounted+') - Capacity: '+(disk.blocks/Math.pow(2, 30)).toFixed(2)+' GB'
+        }
+        diskInfo.push(obj);
+        diskStrings.push(obj.String)
     }
-    return diskInfo;
+    return {disks: diskInfo, diskString:diskStrings.join('<br />')};
 }
 
 var publicIP = getPublicIP();
 var localIP = getLocalIP();
 console.log(localIP)
 var geo = geoip.lookup(publicIP);
-
+var country_info = lookup.byInternet(geo.country);
 module.exports = {
     DeviceType: Config.DeviceType,
     DeviceTypeString: DeviceTypes.GetDeviceName(Config.DeviceType),
     PublicIp: publicIP,
     LocalIp: localIP,
-    Country: geo.country,
+    Country: country_info.country,
+    Continent: country_info.continent,
     Region: geo.region,
     Timezone: geo.timezone,
     City: geo.city,

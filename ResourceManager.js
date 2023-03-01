@@ -63,7 +63,6 @@ class ResourceInfo {
     }
 }
 
-
 class Resources {
     constructor(FogETex) {
         this.FogETex = FogETex;
@@ -71,21 +70,26 @@ class Resources {
         this.previous=null;
         this.tick();
         var t = this;
-        this.timer=setInterval(function(){t.tick()},Config.ResourceManagerSamplingPeriod);
+        this.timer=setInterval(function(){t.tick()},Config.RM_SamplingPeriod);
+    }
+
+    SendResourceInfo(info){
+        //Send it to the User Interface
+        this.FogETex.Socket.ui_clients['Home'].forEach(element => element.emit("resource_info", info))
     }
 
     tick(){
-        //var temp_req_res=this.io.users_package
-        //this.io.users_package={}
+        var temp_req_res=this.FogETex.Socket.users_package
+        this.FogETex.Socket.users_package={}
         var resourceInfo=new ResourceInfo(this.previous);
         this.resourcesInfos.push(resourceInfo);
-        if(this.resourcesInfos.length>=Config.ResourceManagerBufferCount){
+        if(this.resourcesInfos.length>=Config.RM_BufferSize){
             var tempList=this.resourcesInfos;
             this.resourcesInfos=[];
         }
         this.previous=resourceInfo;
-        //resourceInfo.user_package=temp_req_res
-        this.io.SendResourceInfo(resourceInfo);
+        resourceInfo.user_package=temp_req_res
+        this.SendResourceInfo(resourceInfo);
         //console.log(this.previous);
 
     }

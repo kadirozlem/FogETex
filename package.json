@@ -19,6 +19,7 @@
   "homepage": "https://github.com/kadirozlem/FogETex#readme",
   "dependencies": {
     "cookie-parser": "^1.4.6",
+    "country-code-lookup": "^0.0.22",
     "ejs": "^3.1.8",
     "express": "^4.18.2",
     "geoip-lite": "^1.4.7",

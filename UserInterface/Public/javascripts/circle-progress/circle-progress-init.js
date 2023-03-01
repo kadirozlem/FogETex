@@ -54,13 +54,7 @@
             gradient: ["#f44236"]
         }
     });
-    $('#info-circle-card').circleProgress({
-        value: 0.70,
-        size: 100,
-        fill: {
-            gradient: ["#a389d5"]
-        }
-    });
+
     
     
     

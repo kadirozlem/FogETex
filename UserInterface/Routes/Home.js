@@ -1,9 +1,10 @@
 const express = require("express");
-var router = express.Router();
+const Config = require("../../Config");
+const router = express.Router();
 
 router.get('/', function (req, res, next){
 
-    res.render('index',{title:"FogETex", user:"Kadir", deviceInfo:req.app.FogETex.DeviceInfo})
+    res.render('index',{title:"FogETex", UserType:Config.DeviceTypes.UserInterface, DeviceInfo:req.app.FogETex.DeviceInfo,Directory: 'Home'})
 });
 
 module.exports = router;
