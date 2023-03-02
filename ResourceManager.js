@@ -78,14 +78,22 @@ class Resources {
         this.FogETex.Socket.ui_clients['Home'].forEach(element => element.emit("resource_info", info))
     }
 
+    GetBulkData(){
+
+        const cpu_data= this.resourcesInfos.map(x=> x.cpu_percentage.total.usage)
+        const cores=this.resourcesInfos[this.resourcesInfos.length-1].cpu_percentage.cores.map(x=>x.usage);
+        return {cpu:cpu_data, cores: cores }
+    }
+
     tick(){
         var temp_req_res=this.FogETex.Socket.users_package
         this.FogETex.Socket.users_package={}
         var resourceInfo=new ResourceInfo(this.previous);
         this.resourcesInfos.push(resourceInfo);
         if(this.resourcesInfos.length>=Config.RM_BufferSize){
-            var tempList=this.resourcesInfos;
-            this.resourcesInfos=[];
+            //var tempList=this.resourcesInfos;
+            //this.resourcesInfos=[];
+            this.resourcesInfos.shift()
         }
         this.previous=resourceInfo;
         resourceInfo.user_package=temp_req_res

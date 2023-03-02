@@ -133,6 +133,10 @@ module.exports=function (FogEtex) {
             }
             io.ui_clients[socket.Directory].push(socket);
 
+            if(socket.Directory=='Home'){
+                socket.emit('bulk_data', FogEtex.ResourceManager.GetBulkData());
+            }
+
             socket.on("disconnect", (reason) => {
                 var ui_index = io.ui_clients[socket.Directory].indexOf(socket);
                 if (ui_index !== -1) {

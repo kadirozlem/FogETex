@@ -161,3 +161,9 @@ input:checked + .toogleslider:before {
     font-size: 16px;
     text-align: left !important;
 }
+
+.system_info_card div[class^='col']{
+    padding-left: 5px;
+    padding-right: 5px;
+}
+

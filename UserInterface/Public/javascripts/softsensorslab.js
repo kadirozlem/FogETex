@@ -107,20 +107,21 @@ CheckAllMoveButtons = function () {
     $('#chart_row .move_icon.move_right:last').attr('disabled', true).prop('disabled', true);
 }
 
-ChartObject = function (divId, title) {
+ChartObjectOld = function (divId, title) {
     this.divId = divId;
     this.title = title;
-    this.max_total_point = 600;
+    this.max_total_point = 100;
     this.linedata = [];
     this.totalPoints = this.max_total_point;
     this.y_min = 0;
     this.y_max = 100;
     this.index_value = 1;
     this.y_val_height = 20;
-    this.frequency = 50;
+    this.frequency = 1;
     this.counter = 0;
-    this.mod_number = 3;
+    this.mod_number = 2;
     this.div_count_in_row = 3;
+    this.update_y=true;
 
     this.initialize = function () {
         this.AddDiv();
@@ -202,6 +203,23 @@ ChartObject = function (divId, title) {
         }
         this.counter = this.counter + 1;
     };
+
+    this.AddBulkData = function (arr){
+        arr.forEach(x => this.AddData(x));
+        // Since the axes don't change, we don't need to call plot.setupGrid()
+        if (this.index_value > this.totalPoints) {
+            this.opts.xaxes[0].min = (this.index_value - this.totalPoints + 1) / this.frequency;
+            this.opts.xaxes[0].max = this.index_value / this.frequency;
+        }
+
+        if (this.counter % this.mod_number == 0) {
+            this.plot.setupGrid();
+
+            this.plot.draw();
+        }
+
+    }
+
     this.AddData = function (y) {
 
         if (this.linedata.length >= this.totalPoints - 1)
@@ -211,22 +229,23 @@ ChartObject = function (divId, title) {
         // if (!prev)
         //     prev = 50
 
+        if(this.update_y) {
+            if (y < this.y_min) {
+                this.y_min = y - this.y_val_height;
+                this.UpdateYAxis();
+            } else if (y > this.y_max) {
+                this.y_max = y + this.y_val_height;
 
-        if (y < this.y_min) {
-            this.y_min = y - this.y_val_height;
-            this.UpdateYAxis();
-        } else if (y > this.y_max) {
-            this.y_max = y + this.y_val_height;
+                this.UpdateYAxis();
+            } else if (this.index_value % 30 == 0) {
+                var temp_values = this.linedata.map(function (elt) {
+                    return elt[1];
+                });
+                this.y_max = Math.max.apply(null, temp_values) + this.y_val_height;
+                this.y_min = Math.min.apply(null, temp_values) - this.y_val_height;
 
-            this.UpdateYAxis();
-        } else if (this.index_value % 30 == 0) {
-            var temp_values = this.linedata.map(function (elt) {
-                return elt[1];
-            });
-            this.y_max = Math.max.apply(null, temp_values) + this.y_val_height;
-            this.y_min = Math.min.apply(null, temp_values) - this.y_val_height;
-
-            this.UpdateYAxis();
+                this.UpdateYAxis();
+            }
         }
 
         this.linedata.push([this.index_value / this.frequency, y]);
@@ -272,6 +291,42 @@ ChartObject = function (divId, title) {
         $('#' + this.divId + "_div").remove();
     }
 };
+
+CPUCoreObject = function (divId, index){
+    this.divId=divId;
+    this.index = index
+    this.circleId ="cpu_core_"+this.index;
+   this.initialize=function (){
+       const divStr = `<div class="col-md-3">
+                                <div class="card text-center">
+                                    <div class="m-t-10">
+                                        <h4 class="card-title"><i class="fa-solid fa-microchip"></i>  Core ${this.index}</h4>
+                                    </div>
+                                    <div class="widget-card-circle pr m-t-20 m-b-20" id="${this.circleId}">
+                                        <i class="pa">0%</i>
+                                    </div>
+                                </div>
+                            </div>`;
+
+       $('#'+this.divId).append(divStr);
+       this.CircleProgress();
+    }
+
+    this.CircleProgress=function (color="#a389d5",size=100){
+        $('#'+this.circleId).circleProgress({
+            value: 0.70,
+            size: 100,
+            fill: {
+                gradient: ["#a389d5"]
+            }
+        });
+    }
+    this.Change=function (value){
+        $('#'+this.circleId).circleProgress({value:value,animationStartValue:$('#'+this.circleId).circleProgress('value')})
+        $('#'+this.circleId +' i').html(parseInt(100*value)+'%')
+    }
+
+}
 
 SSLCustomColor = function (hex_color) {
     this.hex_color = hex_color;

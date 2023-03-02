@@ -32,7 +32,7 @@
 
                 <!-- /# row -->
                 <div class="row">
-                    <div class="col-lg-6 col-md-6 col-sm12">
+                    <div class="col-lg-5 col-md-5 col-sm12">
                         <div class="card alert">
                             <div class="card-title">
                                 <h4><i class="fa fa-area-chart"></i>Device Information</h4>
@@ -122,12 +122,90 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-lg-7 col-md-7 col-sm12 system_info_card" >
+                        <div class="row">
+                            <div class="col-3">
+                                    <div class="card" id="harddrive_card">
+                                        <div class="stat-widget-two">
+                                            <div class="stat-content">
+                                                <div class="stat-text"><i class="fa-solid fa-hard-drive"></i>  Hard Drive</div>
+                                                <div class="stat-digit"> <%- DeviceInfo.SystemInformation.Disk.disks[0].Capacity %></div>
+                                            </div>
+                                            <div class="progress">
+                                                <div class="progress-bar progress-bar-success " style="width: <%- DeviceInfo.SystemInformation.Disk.disks[0].Capacity %>;" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+                                            </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card" id="ram_card">
+                                    <div class="stat-widget-two">
+                                        <div class="stat-content">
+                                            <div class="stat-text"><i class="fa-solid fa-memory"></i>  Memory</div>
+                                            <div class="stat-digit"> 85</div>
+                                        </div>
+                                        <div class="progress">
+                                            <div class="progress-bar progress-bar-success w-85" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card" id="system_time_card">
+                                    <div class="stat-widget-two">
+                                        <div class="stat-content">
+                                            <div class="stat-text"><i class="fa-solid fa-gears"></i> System Time</div>
+                                            <div class="stat-digit"> 350:12:15</div>
+                                        </div>
+                                        <div class="progress">
+                                            <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-3">
+                                <div class="card" id="process_time_card">
+                                    <div class="stat-widget-two">
+                                        <div class="stat-content">
+                                            <div class="stat-text"><i class="fa-solid fa-user-gear"></i> Process Time</div>
+                                            <div class="stat-digit"> 25:12:15</div>
+                                        </div>
+                                        <div class="progress">
+                                            <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="25" aria-valuemin="0" aria-valuemax="60"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="card alert">
+                                    <div class="card-title">
+                                        <h4><i class="fa fa-area-chart"></i>  CPU Load</h4>
+                                    </div>
+                                    <div class="cpu-load-chart">
+<!--                                        <div id="cpu-load" class="cpu-load"></div>-->
+                                        <canvas id="cpu-load"></canvas>
+
+                                    </div>
+                                </div>
+                                <!-- /# card -->
+                            </div>
+                            <!-- /# column -->
+                        </div>
+                        <div class="row" id="cpu_core_infos">
+
+
+                        </div>
+
+                    </div>
                 </div>
                 <div class="row">
                     <div class="col-lg-8">
                         <div class="card alert">
                             <div class="card-title">
-                                <h4><i class="fa fa-area-chart"></i>  Your Work</h4>
+                                <h4><i class="fa fa-area-chart"></i>  CPU Load</h4>
                             </div>
                             <div class="cpu-load-chart">
                                 <div id="cpu-load" class="cpu-load"></div>
@@ -244,6 +322,8 @@
     }
 
     circleprogress=new CircleProgress('#info-circle-card');
+
+
 
 </script>
 
@@ -834,6 +914,121 @@
 </script>
 <!--Script Area-->
 <script>
+    ChartObject = function (canvasId, title, datasize=102, labels=null) {
+        this.canvasId = canvasId;
+        this.title = title;
+        this.datasize = datasize;
+        this.labels = labels
+        this.min_y = 0;
+        this.max_y=100;
+
+
+
+        this.Initialize=function (){
+            this.ctx = document.getElementById('cpu-load');
+            this.chart =new Chart(this.ctx, {
+                type: 'line',
+                data: {
+                    labels: this.labels,
+                    datasets: this.datasets
+                },
+                options: {
+                    animation:{
+                      duration: 400
+                    },
+                    responsive: true
+                    ,
+                    scales: {
+                        x: {
+                            mix:0,
+                            max:100,
+                            ticks: {
+                                autoSkip: true,
+                                maxTicksLimit: 21
+                            }
+                        },
+                        y: {
+                            max:100,
+                            min: 0,
+
+                        }
+                    }
+                }
+            });
+        }
+
+        this.createDataSet=function (dataset_titles){
+            if(!this.labels){
+                this.labels=[];
+                for(let i = 0 ; i<this.datasize; i++){
+                        this.labels.push(i);
+                }
+            }
+            this.datasets = dataset_titles.map(item => {
+                return {
+                    label: item,
+                    data: [],
+                    fill: false,
+                    tension: 0.5
+                }
+            });
+        }
+
+        this.AddData=function (values){
+            values.forEach((item, index)=> {
+                const arr = this.datasets[index].data;
+                arr.push(item);
+                if(arr.length>this.datasize-1){
+                    arr.shift();
+                }
+            });
+            this.chart.update()
+        }
+
+        this.AddBulkData=function (values){
+            values.forEach((item, index)=> {
+                const arr = this.datasets[index].data;
+                arr.push(...item);
+                if(arr.length>this.datasize){
+                    this.datasets[index].data=arr.slice(arr.length-arr.datasize,arr.length);
+                }
+            });
+            this.chart.update()
+        }
+    }
+    CPULoad = new ChartObject('cpu-load','CPU Load');
+    CPULoad.ascending=false;
+    CPULoad.createDataSet(['CPU Utilization']);
+    CPULoad.Initialize();
+    // const ctx = document.getElementById('cpu-load');
+    // const labels = [1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10]
+    // const label2 = [5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5]
+    // a=new Chart(ctx, {
+    //         type: 'line',
+    //         data: {
+    //             labels: labels,
+    //             datasets: [{
+    //                 label: 'My First Dataset',
+    //                 data: [65, 59, 80, 81, 56, 55, 40,41],
+    //                 fill: false,
+    //                 borderColor: 'rgb(75, 192, 192)',
+    //                 tension: 0.1
+    //             },
+    //                 {
+    //                     label: 'My First Dataset',
+    //                     data: [33, 44, 76, 21, 54, 11, 40,41],
+    //                     fill: false,
+    //                     borderColor: 'rgb(75, 0, 192)',
+    //                     tension: 0.1
+    //                 }
+    //             ]
+    //         }
+    // });
+</script>
+<script>
+
+    Core_CircleBars=[]
+    Update_Index = 0;
     socket = io('/',{query: {
         DeviceType:"<%= UserType %>",
         Directory:"<%= Directory %>"
@@ -842,7 +1037,7 @@
         console.log('connected');
         $('#connectionIcon').removeClass('disconnect').addClass('connect');
         $('#connectionIcon').data('content', 'Device is connected!').attr('data-content', 'Device connected');
-        socket.emit('control', new SocketCodes.InitialConfiguration([]));
+        //socket.emit('control', new SocketCodes.InitialConfiguration([]));
     });
     //  socket = io('https://'+window.location.hostname+':'+window.location.port);
     // socket.on("device", function (data) {
@@ -860,8 +1055,41 @@
     });
 
     socket.on('resource_info', function (info){
-        console.log(info);
-        circleprogress.Change(info.cpu_percentage.total.usage/100);
+        //console.log(info);
+        //CPU Load Graph
+        CPULoad.AddData([info.cpu_percentage.total.usage]);
+        Update_Index++;
+        //CPU Core Infos
+        if(Update_Index%2==0) {
+            for (let i = 0; i < info.cpu_percentage.cores.length; i++) {
+                Core_CircleBars[i].Change(info.cpu_percentage.cores[i].usage / 100)
+            }
+        }
+        //Process Time
+        $('#process_time_card .stat-digit').html(SecondToTime(info.process_uptime))
+        ChangeProgressBar('#process_time_card .progress-bar', (info.process_uptime%60)/60);
+
+        //System Time
+        $('#system_time_card .stat-digit').html(SecondToTime(info.system_uptime))
+        ChangeProgressBar('#system_time_card .progress-bar', (info.system_uptime%60)/60);
+
+        //Memory
+        const memory_usage = parseInt(100*(info.totalmem-info.freemem)/info.totalmem)
+        $('#ram_card .stat-digit').html(memory_usage+'%')
+        ChangeProgressBar('#ram_card .progress-bar', memory_usage);
+
+        //circleprogress.Change(info.cpu_percentage.total.usage);
+    });
+    socket.on('bulk_data', function (data){
+        for(let i =0; i<data.cores.length; i++){
+            let circle_progress = new CPUCoreObject('cpu_core_infos',i+1);
+            circle_progress.initialize()
+            circle_progress.Change(data.cores[i]/100);
+            Core_CircleBars.push(circle_progress);
+        }
+        data.cores.forEach(x => {
+        })
+        CPULoad.AddBulkData([data.cpu])
     })
 
     socket.on('news', function (data) {
@@ -925,81 +1153,6 @@
     }(jQuery));
 </script>
 
-<script>
-    var Slider_Frequency = 50;
-    var Slider_StartIntex = 0;
-    var Slider_StopIndex = 750;
-    var slider = document.getElementById('duration_picker');
-
-    noUiSlider.create(slider, {
-        start: [Slider_StartIntex, Slider_StopIndex],
-        connect: true,
-        step: 1,
-        orientation: 'horizontal', // 'horizontal' or 'vertical'
-        range: {
-            'min': Slider_StartIntex,
-            'max': Slider_StopIndex
-        },
-        margin: Slider_Frequency * 2,
-        format: wNumb({
-            decimals: 0
-        })
-    });
-
-    var UpdateStartStopLabel = function (startIndex, stopIndex) {
-        var value1 = parseInt(startIndex / Slider_Frequency);
-        var value2 = parseInt(stopIndex / Slider_Frequency);
-        $('#picker_start_time').html(secToTime(value1));
-        $('#picker_end_time').html(secToTime(value2));
-    }
-
-    var SliderStartStopTime = function () {
-        slider.noUiSlider.updateOptions(
-            {
-                start: [Slider_StartIntex, Slider_StopIndex],
-                connect: true,
-                step: 1,
-                orientation: 'horizontal', // 'horizontal' or 'vertical'
-                range: {
-                    'min': Slider_StartIntex,
-                    'max': Slider_StopIndex
-                },
-                margin: Slider_Frequency * 2,
-                format: wNumb({
-                    decimals: 0
-                })
-            },// Object
-            true // Boolean 'fireSetEvent'
-        );
-    }
-
-    slider.noUiSlider.on('update', function (values) {
-        var value1 = parseInt(values[0]);
-        var value2 = parseInt(values[1]);
-        UpdateStartStopLabel(value1, value2);
-    });
-    UpdateStartStopLabel(Slider_StartIntex, Slider_StopIndex);
-    $('#startReplayOperationBtn').on('click',function () {
-        var id=$('#replayDataID').val();
-        //$('#isCircularCheckbox').prop('checked', false);
-        var values=slider.noUiSlider.get();
-
-        var startIndex= parseInt(values[0]);
-        var stopIndex= parseInt(values[1]);
-        var startTime=parseInt(startIndex/Slider_Frequency);
-        var stopTime=parseInt(stopIndex/Slider_Frequency);
-
-        var isCircular= document.getElementById("isCircularCheckbox").checked;
-
-        var op = new SocketCodes.ReplayConfiguration(id, SocketCodes.WROperation.Started);
-        op.StartTime=startTime;
-        op.StopTime=stopTime;
-        op.IsCircular=isCircular;
-
-        socket.emit('control', op);
-        $('#replay_modal').modal('hide');
-    });
-</script>
 <!--End Script Area-->
 
 </body>

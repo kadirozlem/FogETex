@@ -122,3 +122,22 @@ Object.defineProperty(String.prototype, "class", {
         return '.' + this;
     }
 });
+
+function AtLeast2Digit(value){
+    if(value<10){
+        return "0"+value;
+    }
+    return value;
+}
+function SecondToTime(value){
+    value = parseInt(value);
+    const second = value%60;
+    const minute = parseInt(value%3600 /60);
+    const hour = parseInt(value/3600);
+    return AtLeast2Digit(hour)+":"+AtLeast2Digit(minute)+':'+AtLeast2Digit(second);
+}
+
+function ChangeProgressBar(search,value){
+    const new_value = parseInt(value*100);
+    $(search).css('width', new_value+'%');
+}
