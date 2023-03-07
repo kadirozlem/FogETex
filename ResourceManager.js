@@ -1,6 +1,9 @@
 var os = require("os");
 var Config=require("./Config");
 const microtime = require("microtime");
+const { Manager  } = require("socket.io-client");
+//const fetch = require('node-fetch');
+
 
 class ResourceInfo {
     constructor(previous) {
@@ -71,6 +74,9 @@ class Resources {
         this.tick();
         var t = this;
         this.timer=setInterval(function(){t.tick()},Config.RM_SamplingPeriod);
+        if(Config.DeviceType != Config.DeviceTypes.Cloud){
+            this.ConnectParent();
+        }
     }
 
     SendResourceInfo(info){
@@ -78,11 +84,27 @@ class Resources {
         this.FogETex.Socket.ui_clients['Home'].forEach(element => element.emit("resource_info", info))
     }
 
+    async ConnectParent(){
+        const response =fetch('https://jsonplaceholder.typicode.com/users');
+        const data = await response.json();
+
+        const manager = new Manager("ws://localhost:"+Config.Port, {
+            autoConnect: true,
+            query: {
+                DeviceType: Config.DeviceTypes.Worker
+            }
+        });
+
+        this.Socket = manager.socket("/");
+    }
+
     GetBulkData(){
 
         const cpu_data= this.resourcesInfos.map(x=> x.cpu_percentage.total.usage)
         const cores=this.resourcesInfos[this.resourcesInfos.length-1].cpu_percentage.cores.map(x=>x.usage);
-        return {cpu:cpu_data, cores: cores }
+        const request = this.resourcesInfos.map(x=> x.user_package_total.request);
+        const response = this.resourcesInfos.map(x=> x.user_package_total.response);
+        return {cpu:cpu_data, cores: cores, request:request, response: response }
     }
 
     tick(){
@@ -97,6 +119,30 @@ class Resources {
         }
         this.previous=resourceInfo;
         resourceInfo.user_package=temp_req_res
+        resourceInfo.user_package_total={request:0, response:0}
+        for(const key in temp_req_res){
+            resourceInfo.user_package_total.request+=temp_req_res[key].request;
+            resourceInfo.user_package_total.response+=temp_req_res[key].response;
+        }
+
+        if(Config.DeviceType==Config.DeviceTypes.Broker){
+            const children=this.FogETex.Socket.fog_children;
+            resourceInfo.NodeBusy=true;
+            for(const key in children){
+                const child = children[key]
+                if(child.ResourceInfos.length){
+                    const last_resource = child.ResourceInfos[child.ResourceInfos.length - 1]
+                    const cpu_usage = last_resource.cpu_percentage.total.usage;
+                    const memory_usage = 100*(last.totalmem - info.freemem) / info.totalmem;
+                    if(cpu_usage<Config.WorkerCPULimit && memory_usage< Config.WorkerMemoryLimit ){
+                        resourceInfo.NodeBusy=false;
+                        break;
+                    }
+                }
+            }
+
+        }
+
         this.SendResourceInfo(resourceInfo);
         //console.log(this.previous);
 

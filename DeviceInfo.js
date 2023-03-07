@@ -55,6 +55,8 @@ function GetDiskInfo() {
     const disks = nodeDiskInfo.getDiskInfoSync();
     const diskInfo = []
     const diskStrings=[]
+    const power = os.platform()=='win32' ? 30 :20;
+    disks.sort((a,b) => b.blocks - a.blocks);
     for (const disk of disks) {
         const obj ={
             FileSystem: disk.filesystem,
@@ -63,7 +65,7 @@ function GetDiskInfo() {
             Available: disk.available,
             Capacity: disk.capacity,
             Mounted: disk.mounted,
-            String: disk.filesystem+ '('+disk.mounted+') - Capacity: '+(disk.blocks/Math.pow(2, 30)).toFixed(2)+' GB'
+            String: disk.filesystem+ '('+disk.mounted+') - Capacity: '+(disk.blocks/Math.pow(2, power)).toFixed(2)+' GB'
         }
         diskInfo.push(obj);
         diskStrings.push(obj.String)

@@ -33,107 +33,133 @@
                 <!-- /# row -->
                 <div class="row">
                     <div class="col-lg-5 col-md-5 col-sm12">
-                        <div class="card alert">
-                            <div class="card-title">
-                                <h4><i class="fa fa-area-chart"></i>Device Information</h4>
-                            </div>
-                            <div class="device_information">
-                                <table class="table">
-                                    <tbody>
-                                    <tr>
-                                        <td>
-                                            <% if(DeviceInfo.DeviceTypeString=='Cloud'){ %>
-                                            <i class="fa-solid fa-cloud"></i>
-                                                <% } else{ %>
-                                                    <i class="fa-brands fa-raspberry-pi"></i>
+                        <div class="row">
+                            <div class="col-12">
 
-                                                <% } %>
-                                        </td>
-                                        <td>Device Type</td>
-                                        <td><%= DeviceInfo.DeviceTypeString%></td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fa-solid fa-globe"></i></td>
-                                        <td>Global IP</td>
-                                        <td><%= DeviceInfo.PublicIp%></td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fa-solid fa-network-wired"></i></td>
-                                        <td>Local IP</td>
-                                        <td><%= DeviceInfo.LocalIp%></td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fa-solid fa-globe-africa"></i></td>
-                                        <td>Continent</td>
-                                        <td><%= DeviceInfo.Continent%></td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fa-solid fa-flag"></i></td>
-                                        <td>Country</td>
-                                        <td><%= DeviceInfo.Country%></td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fa-solid fa-city"></i></td>
-                                        <td>City</td>
-                                        <td><%= DeviceInfo.City%></td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fa-solid fa-clock"></i></td>
-                                        <td>Timezone</td>
-                                        <td><%= DeviceInfo.Timezone%></td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fa-solid fa-map-location-dot"></i></td>
-                                        <td>Location</td>
-                                        <td><%= DeviceInfo.Location.join(', ')%></td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <% if(DeviceInfo.SystemInformation.OperatingSystem.Platform=='darwin'){ %>
-                                                <i class="fa-brands fa-apple"></i>
-                                            <% } else if(DeviceInfo.SystemInformation.OperatingSystem.Platform=='win32'){ %>
-                                                <i class="fa-brands fa-windows"></i>
-                                                <% } else{ %>
-                                                    <i class="fa-brands fa-linux"></i>
-                                            <% } %>
-                                        </td>
-                                        <td>Operating System</td>
-                                        <td><%= DeviceInfo.SystemInformation.OperatingSystem.Type+ ' / '+
-                                            DeviceInfo.SystemInformation.OperatingSystem.Platform+ ' / '+
-                                            DeviceInfo.SystemInformation.OperatingSystem.Release%></td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fa-solid fa-microchip"></i></td>
-                                        <td>CPUs</td>
-                                        <td><%- DeviceInfo.SystemInformation.CPUs.string %></td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fa-solid fa-memory"></i></td>
-                                        <td>Memory</td>
-                                        <td><%= (DeviceInfo.SystemInformation.Memory/Math.pow(2, 30)).toFixed(2) %> GB</td>
-                                    </tr>
-                                    <tr>
-                                        <td><i class="fa-solid fa-hard-drive"></i></td>
-                                        <td>Hard Drive</td>
-                                        <td><%- DeviceInfo.SystemInformation.Disk.diskString %></td>
-                                    </tr>
-                                    </tbody>
-                                </table>
+                                <div class="card alert">
+                                    <div class="card-title">
+                                        <h4><i class="fa fa-area-chart"></i>Device Information</h4>
+                                    </div>
+                                    <div class="device_information">
+                                        <table class="table">
+                                            <tbody>
+                                            <tr>
+                                                <td>
+                                                    <% if(DeviceInfo.DeviceTypeString == 'Cloud'){ %>
+                                                        <i class="fa-solid fa-cloud"></i>
+                                                    <% } else{ %>
+                                                        <i class="fa-brands fa-raspberry-pi"></i>
+
+                                                    <% } %>
+                                                </td>
+                                                <td>Device Type</td>
+                                                <td><%= DeviceInfo.DeviceTypeString %></td>
+                                            </tr>
+                                            <tr>
+                                                <td><i class="fa-solid fa-globe"></i></td>
+                                                <td>Global IP</td>
+                                                <td><%= DeviceInfo.PublicIp %></td>
+                                            </tr>
+                                            <tr>
+                                                <td><i class="fa-solid fa-network-wired"></i></td>
+                                                <td>Local IP</td>
+                                                <td><%= DeviceInfo.LocalIp %></td>
+                                            </tr>
+                                            <tr>
+                                                <td><i class="fa-solid fa-globe-africa"></i></td>
+                                                <td>Continent</td>
+                                                <td><%= DeviceInfo.Continent %></td>
+                                            </tr>
+                                            <tr>
+                                                <td><i class="fa-solid fa-flag"></i></td>
+                                                <td>Country</td>
+                                                <td><%= DeviceInfo.Country %></td>
+                                            </tr>
+                                            <tr>
+                                                <td><i class="fa-solid fa-city"></i></td>
+                                                <td>City</td>
+                                                <td><%= DeviceInfo.City %></td>
+                                            </tr>
+                                            <tr>
+                                                <td><i class="fa-solid fa-clock"></i></td>
+                                                <td>Timezone</td>
+                                                <td><%= DeviceInfo.Timezone %></td>
+                                            </tr>
+                                            <tr>
+                                                <td><i class="fa-solid fa-map-location-dot"></i></td>
+                                                <td>Location</td>
+                                                <td><%= DeviceInfo.Location.join(', ') %></td>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <% if(DeviceInfo.SystemInformation.OperatingSystem.Platform == 'darwin'){ %>
+                                                        <i class="fa-brands fa-apple"></i>
+                                                    <% } else if(DeviceInfo.SystemInformation.OperatingSystem.Platform == 'win32'){ %>
+                                                        <i class="fa-brands fa-windows"></i>
+                                                    <% } else{ %>
+                                                        <i class="fa-brands fa-linux"></i>
+                                                    <% } %>
+                                                </td>
+                                                <td>Operating System</td>
+                                                <td><%= DeviceInfo.SystemInformation.OperatingSystem.Type + ' / ' +
+                                                    DeviceInfo.SystemInformation.OperatingSystem.Platform + ' / ' +
+                                                    DeviceInfo.SystemInformation.OperatingSystem.Release %></td>
+                                            </tr>
+                                            <tr>
+                                                <td><i class="fa-solid fa-microchip"></i></td>
+                                                <td>CPUs</td>
+                                                <td><%- DeviceInfo.SystemInformation.CPUs.string %></td>
+                                            </tr>
+                                            <tr>
+                                                <td><i class="fa-solid fa-memory"></i></td>
+                                                <td>Memory</td>
+                                                <td><%= (DeviceInfo.SystemInformation.Memory / Math.pow(2, 30)).toFixed(2) %>
+                                                    GB
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td><i class="fa-solid fa-hard-drive"></i></td>
+                                                <td>Hard Drive</td>
+                                                <td><%- DeviceInfo.SystemInformation.Disk.diskString %></td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="card alert">
+                                    <div class="card-title">
+                                        <h4><i class="fa fa-area-chart"></i> Request / Response</h4>
+                                    </div>
+                                    <div class="request_response-chart">
+                                        <!--                                        <div id="cpu-load" class="cpu-load"></div>-->
+                                        <canvas id="request_response"></canvas>
+
+                                    </div>
+                                </div>
+                                <!-- /# card -->
                             </div>
                         </div>
                     </div>
-                    <div class="col-lg-7 col-md-7 col-sm12 system_info_card" >
+                    <div class="col-lg-7 col-md-7 col-sm12 system_info_card">
                         <div class="row">
                             <div class="col-3">
-                                    <div class="card" id="harddrive_card">
-                                        <div class="stat-widget-two">
-                                            <div class="stat-content">
-                                                <div class="stat-text"><i class="fa-solid fa-hard-drive"></i>  Hard Drive</div>
-                                                <div class="stat-digit"> <%- DeviceInfo.SystemInformation.Disk.disks[0].Capacity %></div>
+                                <div class="card" id="harddrive_card">
+                                    <div class="stat-widget-two">
+                                        <div class="stat-content">
+                                            <div class="stat-text"><i class="fa-solid fa-hard-drive"></i> Hard Drive
                                             </div>
-                                            <div class="progress">
-                                                <div class="progress-bar progress-bar-success " style="width: <%- DeviceInfo.SystemInformation.Disk.disks[0].Capacity %>;" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
-                                            </div>
+                                            <div class="stat-digit"> <%- DeviceInfo.SystemInformation.Disk.disks[0].Capacity %></div>
+                                        </div>
+                                        <div class="progress">
+                                            <div class="progress-bar progress-bar-success "
+                                                 style="width: <%- DeviceInfo.SystemInformation.Disk.disks[0].Capacity %>;"
+                                                 role="progressbar" aria-valuenow="85" aria-valuemin="0"
+                                                 aria-valuemax="100"></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -141,11 +167,12 @@
                                 <div class="card" id="ram_card">
                                     <div class="stat-widget-two">
                                         <div class="stat-content">
-                                            <div class="stat-text"><i class="fa-solid fa-memory"></i>  Memory</div>
+                                            <div class="stat-text"><i class="fa-solid fa-memory"></i> Memory</div>
                                             <div class="stat-digit"> 85</div>
                                         </div>
                                         <div class="progress">
-                                            <div class="progress-bar progress-bar-success w-85" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+                                            <div class="progress-bar progress-bar-success" role="progressbar"
+                                                 aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -158,7 +185,8 @@
                                             <div class="stat-digit"> 350:12:15</div>
                                         </div>
                                         <div class="progress">
-                                            <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                                            <div class="progress-bar progress-bar-success" role="progressbar"
+                                                 aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -167,11 +195,13 @@
                                 <div class="card" id="process_time_card">
                                     <div class="stat-widget-two">
                                         <div class="stat-content">
-                                            <div class="stat-text"><i class="fa-solid fa-user-gear"></i> Process Time</div>
+                                            <div class="stat-text"><i class="fa-solid fa-user-gear"></i> Process Time
+                                            </div>
                                             <div class="stat-digit"> 25:12:15</div>
                                         </div>
                                         <div class="progress">
-                                            <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="25" aria-valuemin="0" aria-valuemax="60"></div>
+                                            <div class="progress-bar progress-bar-success" role="progressbar"
+                                                 aria-valuenow="25" aria-valuemin="0" aria-valuemax="60"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -182,10 +212,10 @@
                             <div class="col-lg-12">
                                 <div class="card alert">
                                     <div class="card-title">
-                                        <h4><i class="fa fa-area-chart"></i>  CPU Load</h4>
+                                        <h4><i class="fa fa-area-chart"></i> CPU Load</h4>
                                     </div>
                                     <div class="cpu-load-chart">
-<!--                                        <div id="cpu-load" class="cpu-load"></div>-->
+                                        <!--                                        <div id="cpu-load" class="cpu-load"></div>-->
                                         <canvas id="cpu-load"></canvas>
 
                                     </div>
@@ -194,7 +224,7 @@
                             </div>
                             <!-- /# column -->
                         </div>
-                        <div class="row" id="cpu_core_infos">
+                        <div class="row justify-content-center" id="cpu_core_infos">
 
 
                         </div>
@@ -205,7 +235,7 @@
                     <div class="col-lg-8">
                         <div class="card alert">
                             <div class="card-title">
-                                <h4><i class="fa fa-area-chart"></i>  CPU Load</h4>
+                                <h4><i class="fa fa-area-chart"></i> CPU Load</h4>
                             </div>
                             <div class="cpu-load-chart">
                                 <div id="cpu-load" class="cpu-load"></div>
@@ -217,7 +247,7 @@
                     <div class="col-md-4">
                         <div class="card text-center">
                             <div class="m-t-10">
-                                <h4 class="card-title"><i class="fa fa-pie-chart"></i>  Daily Work</h4>
+                                <h4 class="card-title"><i class="fa fa-pie-chart"></i> Daily Work</h4>
                             </div>
                             <div class="widget-card-circle pr m-t-20 m-b-20" id="info-circle-card">
                                 <i class="ti-control-shuffle pa"></i>
@@ -237,11 +267,12 @@
                         <div class="card">
                             <div class="stat-widget-two">
                                 <div class="stat-content">
-                                    <div class="stat-text"><i class="fa fa-child"></i>  Steps Today</div>
+                                    <div class="stat-text"><i class="fa fa-child"></i> Steps Today</div>
                                     <div class="stat-digit"> 85</div>
                                 </div>
                                 <div class="progress">
-                                    <div class="progress-bar progress-bar-success w-85" role="progressbar" aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
+                                    <div class="progress-bar progress-bar-success w-85" role="progressbar"
+                                         aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
                                 </div>
                             </div>
                         </div>
@@ -250,11 +281,15 @@
                         <div class="card">
                             <div class="stat-widget-two">
                                 <div class="stat-content">
-                                    <div class="stat-text"><i class="fa fa-child"></i>  Steps This Week</div>
-                                    <div class="stat-digit"><%= (DeviceInfo.SystemInformation.Memory/Math.pow(2, 30)).toFixed(2) %> GB</div>
+                                    <div class="stat-text"><i class="fa fa-child"></i> Steps This Week</div>
+                                    <div class="stat-digit"><%= (DeviceInfo.SystemInformation.Memory / Math.pow(2, 30)).toFixed(2) %>
+                                        GB
+                                    </div>
                                 </div>
                                 <div class="progress">
-                                    <div class="progress-bar progress-bar-primary" role="progressbar" aria-valuenow="8264984" aria-valuemin="0" aria-valuemax="<%= DeviceInfo.SystemInformation.Memory/Math.pow(2, 10) %>"></div>
+                                    <div class="progress-bar progress-bar-primary" role="progressbar"
+                                         aria-valuenow="8264984" aria-valuemin="0"
+                                         aria-valuemax="<%= DeviceInfo.SystemInformation.Memory / Math.pow(2, 10) %>"></div>
                                 </div>
                             </div>
                         </div>
@@ -263,11 +298,12 @@
                         <div class="card">
                             <div class="stat-widget-two">
                                 <div class="stat-content">
-                                    <div class="stat-text"><i class="fa fa-check-square"></i>  Task Completed</div>
+                                    <div class="stat-text"><i class="fa fa-check-square"></i> Task Completed</div>
                                     <div class="stat-digit"> 650</div>
                                 </div>
                                 <div class="progress">
-                                    <div class="progress-bar progress-bar-danger w-65" role="progressbar" aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
+                                    <div class="progress-bar progress-bar-danger w-65" role="progressbar"
+                                         aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
                                 </div>
                             </div>
                         </div>
@@ -307,7 +343,7 @@
 
 <!--<script src="/javascripts/helper.js"></script>-->
 <script>
-    CircleProgress=function (name,color="#a389d5",size=100){
+    CircleProgress = function (name, color = "#a389d5", size = 100) {
         $('#info-circle-card').circleProgress({
             value: 0.70,
             size: 100,
@@ -316,13 +352,12 @@
             }
         });
 
-        this.Change=function (value){
-            $(name).circleProgress({value:value,animationStartValue:$(name).circleProgress('value')})
+        this.Change = function (value) {
+            $(name).circleProgress({value: value, animationStartValue: $(name).circleProgress('value')})
         }
     }
 
-    circleprogress=new CircleProgress('#info-circle-card');
-
+    circleprogress = new CircleProgress('#info-circle-card');
 
 
 </script>
@@ -914,41 +949,40 @@
 </script>
 <!--Script Area-->
 <script>
-    ChartObject = function (canvasId, title, datasize=102, labels=null) {
+    ChartObject = function (canvasId, title, datasize = 102, labels = null) {
         this.canvasId = canvasId;
         this.title = title;
         this.datasize = datasize;
         this.labels = labels
         this.min_y = 0;
-        this.max_y=100;
+        this.max_y = 100;
 
 
-
-        this.Initialize=function (){
-            this.ctx = document.getElementById('cpu-load');
-            this.chart =new Chart(this.ctx, {
+        this.Initialize = function () {
+            this.ctx = document.getElementById(this.canvasId);
+            this.chart = new Chart(this.ctx, {
                 type: 'line',
                 data: {
                     labels: this.labels,
                     datasets: this.datasets
                 },
                 options: {
-                    animation:{
-                      duration: 400
+                    animation: {
+                        duration: 400
                     },
                     responsive: true
                     ,
                     scales: {
                         x: {
-                            mix:0,
-                            max:100,
+                            mix: 0,
+                            max: 100,
                             ticks: {
                                 autoSkip: true,
                                 maxTicksLimit: 21
                             }
                         },
                         y: {
-                            max:100,
+                            max: 100,
                             min: 0,
 
                         }
@@ -957,11 +991,11 @@
             });
         }
 
-        this.createDataSet=function (dataset_titles){
-            if(!this.labels){
-                this.labels=[];
-                for(let i = 0 ; i<this.datasize; i++){
-                        this.labels.push(i);
+        this.createDataSet = function (dataset_titles) {
+            if (!this.labels) {
+                this.labels = [];
+                for (let i = 0; i < this.datasize; i++) {
+                    this.labels.push(i);
                 }
             }
             this.datasets = dataset_titles.map(item => {
@@ -974,32 +1008,36 @@
             });
         }
 
-        this.AddData=function (values){
-            values.forEach((item, index)=> {
+        this.AddData = function (values) {
+            values.forEach((item, index) => {
                 const arr = this.datasets[index].data;
                 arr.push(item);
-                if(arr.length>this.datasize-1){
+                if (arr.length > this.datasize - 1) {
                     arr.shift();
                 }
             });
             this.chart.update()
         }
 
-        this.AddBulkData=function (values){
-            values.forEach((item, index)=> {
+        this.AddBulkData = function (values) {
+            values.forEach((item, index) => {
                 const arr = this.datasets[index].data;
                 arr.push(...item);
-                if(arr.length>this.datasize){
-                    this.datasets[index].data=arr.slice(arr.length-arr.datasize,arr.length);
+                if (arr.length > this.datasize) {
+                    this.datasets[index].data = arr.slice(arr.length - arr.datasize, arr.length);
                 }
             });
             this.chart.update()
         }
     }
-    CPULoad = new ChartObject('cpu-load','CPU Load');
-    CPULoad.ascending=false;
+    CPULoad = new ChartObject('cpu-load', 'CPU Load');
     CPULoad.createDataSet(['CPU Utilization']);
     CPULoad.Initialize();
+
+    RequestResponseChart = new ChartObject('request_response', 'Request / Response');
+    RequestResponseChart.createDataSet(['Reqeust','Response']);
+    RequestResponseChart.Initialize();
+
     // const ctx = document.getElementById('cpu-load');
     // const labels = [1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10]
     // const label2 = [5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5]
@@ -1027,12 +1065,14 @@
 </script>
 <script>
 
-    Core_CircleBars=[]
+    Core_CircleBars = []
     Update_Index = 0;
-    socket = io('/',{query: {
-        DeviceType:"<%= UserType %>",
-        Directory:"<%= Directory %>"
-    }});
+    socket = io('/', {
+        query: {
+            DeviceType: "<%= UserType %>",
+            Directory: "<%= Directory %>"
+        }
+    });
     socket.on('connect', function () {
         console.log('connected');
         $('#connectionIcon').removeClass('disconnect').addClass('connect');
@@ -1054,42 +1094,42 @@
 
     });
 
-    socket.on('resource_info', function (info){
+    socket.on('resource_info', function (info) {
         //console.log(info);
         //CPU Load Graph
         CPULoad.AddData([info.cpu_percentage.total.usage]);
+        RequestResponseChart.AddData([info.user_package_total.request, info.user_package_total.response]);
         Update_Index++;
         //CPU Core Infos
-        if(Update_Index%2==0) {
+        if (Update_Index % 2 == 0) {
             for (let i = 0; i < info.cpu_percentage.cores.length; i++) {
                 Core_CircleBars[i].Change(info.cpu_percentage.cores[i].usage / 100)
             }
         }
         //Process Time
         $('#process_time_card .stat-digit').html(SecondToTime(info.process_uptime))
-        ChangeProgressBar('#process_time_card .progress-bar', (info.process_uptime%60)/60);
+        ChangeProgressBar('#process_time_card .progress-bar', (info.process_uptime % 60) / 60);
 
         //System Time
         $('#system_time_card .stat-digit').html(SecondToTime(info.system_uptime))
-        ChangeProgressBar('#system_time_card .progress-bar', (info.system_uptime%60)/60);
+        ChangeProgressBar('#system_time_card .progress-bar', (info.system_uptime % 60) / 60);
 
         //Memory
-        const memory_usage = parseInt(100*(info.totalmem-info.freemem)/info.totalmem)
-        $('#ram_card .stat-digit').html(memory_usage+'%')
-        ChangeProgressBar('#ram_card .progress-bar', memory_usage);
+        const memory_usage = parseInt(100 * (info.totalmem - info.freemem) / info.totalmem)
+        $('#ram_card .stat-digit').html(memory_usage + '%')
+        ChangeProgressBar('#ram_card .progress-bar', memory_usage/100);
 
         //circleprogress.Change(info.cpu_percentage.total.usage);
     });
-    socket.on('bulk_data', function (data){
-        for(let i =0; i<data.cores.length; i++){
-            let circle_progress = new CPUCoreObject('cpu_core_infos',i+1);
+    socket.on('bulk_data', function (data) {
+        for (let i = 0; i < data.cores.length; i++) {
+            let circle_progress = new CPUCoreObject('cpu_core_infos', i + 1);
             circle_progress.initialize()
-            circle_progress.Change(data.cores[i]/100);
+            circle_progress.Change(data.cores[i] / 100);
             Core_CircleBars.push(circle_progress);
         }
-        data.cores.forEach(x => {
-        })
         CPULoad.AddBulkData([data.cpu])
+        RequestResponseChart.AddBulkData([data.request, data.response]);
     })
 
     socket.on('news', function (data) {

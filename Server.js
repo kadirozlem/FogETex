@@ -22,6 +22,6 @@ FogETex.ResourceManager = new ResourceManager(FogETex);
 //     console.log('a user connected');
 // });
 
-server.listen(Config.Port, () => {
+server.listen(Config.Port, '0.0.0.0',() => {
     console.log('listening on *:'+Config.Port);
 });

@@ -29,15 +29,95 @@ module.exports=function (FogEtex) {
         if(socket.devicetype == Config.DeviceTypes.User){
             socket.userId = io.GetCandidateUserId();
             socket.FileName =  Helper.DateTimeAsFilename()+'_'+socket.id;
+            socket.emit('filename', socket.FileName);
         }
         console.log(Config.DeviceTypes.GetDeviceName(socket.devicetype)+" connected");
 
-        if(Config.DeviceType==Config.DeviceTypes.Broker){
-            socket.on("resource_info",(resourceInformation)=>{
+        if(socket.DeviceType==Config.DeviceTypes.Worker){
+            io.fog_children[socket.id] = { DeviceInfo: null, ResourceInfos:[]}
 
+            socket.on('device_info', (device_info)=>{
+                io.fog_children[socket.id].DeviceInfo = device_info;
+                io.to('iu').emit('device_info', {SocketId : socket.id, DeviceInfo:device_info} );
+                FogEtex.ResourceManager.Emit('worker_device_info', socket.id, device_info);
+            });
+
+            socket.on('resource_info', (resource_info)=>{
+                const arr=io.fog_children[socket.id].ResourceInfos;
+                arr.push(resource_info);
+                if (arr.length > Config.RM_BufferSize){
+                    arr.shift()
+                }
+                io.ui_clients[socket.id].forEach(x => x.emit('resource_info', resource_info));
+                FogEtex.ResourceManager.Emit('worker_resource_info', socket.id, resource_info);
+            });
+
+            socket.on('disconnect',(reason) =>{
+                FogEtex.ResourceManager.Emit('worker_disconnected', socket.id, reason);
+                io.to('iu').emit('device_disconnected',{SocketId:socket.id, Reason:reason});
+                const key = socket.id;
+                if(io.fog_children[key]){
+                    delete io.fog_children[key];
+                }
             });
         }
 
+        if(socket.DeviceType==Config.DeviceTypes.Broker){
+            io.fog_children[socket.id] = { DeviceInfo: null, ResourceInfos:[], Children:{}}
+
+            socket.on('device_info', (device_info)=>{
+                io.fog_children[socket.id].DeviceInfo = device_info;
+                io.to('iu').emit('device_info', {SocketId : socket.id, DeviceInfo:device_info} );
+            });
+
+            socket.on('resource_info', (resource_info)=>{
+                const arr=io.fog_children[socket.id].ResourceInfos;
+                arr.push(resource_info);
+                if (arr.length > Config.RM_BufferSize){
+                    arr.shift()
+                }
+                const ui_clients = io.ui_clients[socket.id];
+                if(ui_clients) {
+                    ui_clients.forEach(x => x.emit('resource_info', resource_info));
+                }
+            });
+
+            socket.on('worker_device_info', (socket_id,device_info)=>{
+                io.fog_children[socket.id].Children[socket_id]={DeviceInfo : device_info, ResourceInfos:[]}
+                io.to('iu').emit('device_info', {SocketId:socket_id, ParentId: socket.id, DeviceInfo:device_info} );
+            });
+
+            socket.on('worker_resource_info', (socket_id, resource_info)=>{
+                const arr=io.fog_children[socket.id].Children[socket_id].ResourceInfos;
+                arr.push(resource_info);
+                if (arr.length > Config.RM_BufferSize){
+                    arr.shift()
+                }
+                const ui_clients = io.ui_clients[socket.id+'_'+socket_id];
+                if(ui_clients) {
+                    ui_clients.forEach(x => x.emit('resource_info', resource_info));
+                }
+                FogEtex.ResourceManager.Emit('worker_resource_info', socket.id, resource_info);
+            });
+
+            socket.on('worker_disconnected', (socket_id, reason)=>{
+                io.to('iu').emit('device_disconnected',{SocketId:socket_id, ParentId: socket.id,Reason:reason});
+                const key = socket.id + _ + socket_id;
+                if(io.fog_children[key]){
+                    delete io.fog_children[key];
+                }
+            });
+
+            socket.on('disconnect',(reason) =>{
+                io.to('iu').emit('device_disconnected',{SocketId:socket.id, Reason:reason});
+                const key = socket.id;
+                if(io.fog_children[key]){
+                    delete io.fog_children[key];
+                }
+            })
+
+
+        }
         if(socket.devicetype==Config.DeviceTypes.User){
             socket.on("disconnect", (reason) => {
                 console.log("User disconnected " + reason)
@@ -127,7 +207,7 @@ module.exports=function (FogEtex) {
 
         if(socket.devicetype==Config.DeviceTypes.UserInterface){
             socket.Directory = socket.handshake.query.Directory;
-
+            socket.join('ui');
             if(!io.ui_clients[socket.Directory]){
                 io.ui_clients[socket.Directory]=[]
             }

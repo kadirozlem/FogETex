@@ -10,6 +10,15 @@ node -v
 #Install Node Package Manager
 sudo apt install npm
 
+#Install Git
+sudo apt install git
+
+#Check Git Version
+git --version
+
+#Pull Project From Git Repository
+git clone https://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@github.com/kadirozlem/FogETex.git
+
 #Install All Modules For Project
 npm install
 
