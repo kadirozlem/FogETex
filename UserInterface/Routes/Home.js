@@ -2,6 +2,7 @@ const express = require("express");
 const Config = require("../../Config");
 const router = express.Router();
 const shell = require('shelljs')
+var pjson = require('../../package.json');
 
 router.get('/', function (req, res, next){
 
@@ -9,7 +10,7 @@ router.get('/', function (req, res, next){
 });
 
 router.get('/DeviceStatus', (req, res, next)=>{
-    res.json({Status: 'Running', DeviceType: req.app.FogETex.DeviceInfo.DeviceTypeString});
+    res.json({Status: 'Running', DeviceType: req.app.FogETex.DeviceInfo.DeviceTypeString, Version:pjson.version});
 });
 
 router.get('/UpdateDevice', (req, res,next)=>{

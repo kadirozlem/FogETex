@@ -1,5 +1,7 @@
 const Config = require("../Config");
-const fetch = require('node-fetch');
+
+const axios = require('axios')
+
 
 
 const DeviceIP=[
@@ -8,10 +10,11 @@ const DeviceIP=[
 ]
 
 
-async function UpdateDevice(ìp){
-    const response =fetch(`http://${ip}:${Config.Port}/UpdateDevice`);
-    const data = await response.json();
-    a=1;
+function UpdateDevice(ip){
+    axios.get(`http://${ip}:${Config.Port}/DeviceStatus`)
+
+        .then(res => console.log(res.data))
+        .catch(err => console.log(err))
 }
 
 function UpdateDevices(){
@@ -38,4 +41,5 @@ function main(){
         console.log('main(): Command is missing!');
     }
 }
+
 main();
