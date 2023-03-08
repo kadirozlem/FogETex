@@ -1,6 +1,5 @@
 var geoip = require('geoip-lite');
 const {execSync} = require("child_process");
-const {Region, PublicIp} = require("./DeviceInfo");
 const Config = require("./Config");
 const os = require("os");
 const nodeDiskInfo = require('node-disk-info');

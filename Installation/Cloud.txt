@@ -1,14 +1,24 @@
 #Update Packages
 sudo apt update
 
-#Install Node JS
-sudo apt install nodejs
+#Run the nvm installer
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+
+#Update Profile Configuration
+export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+
+#Reload the shell configuration
+source ~/.bashrc
+
+#Check nvm version
+nvm -v
+
+#Install NodeJS 18.15.0 and NPM version 9.5.0
+nvm install v18.15.0
 
 #Check NodeJS version
 node -v
-
-#Install Node Package Manager
-sudo apt install npm
 
 #Install Git
 sudo apt install git
@@ -28,11 +38,11 @@ git remote set-url origin https://kadirozlem:github_pat_11AB5HBWI08UuvcQp4woUu_Q
 #Set git pull method as Fast Forward Only to eliminate warnings
 git config pull.ff only
 
-#Set Device Type (Device Types: Cloud, Broker, Worker)
-node .\Config\CacheDeviceType.js Cloud
-
 #Install All Modules For Project
 npm install
+
+#Set Device Type (Device Types: Cloud, Broker, Worker)
+node ./Config/CacheDeviceType.js Cloud
 
 #Install Forever Module
 sudo npm install forever -g

@@ -2,7 +2,7 @@ var os = require("os");
 var Config=require("./Config");
 const microtime = require("microtime");
 const { Manager  } = require("socket.io-client");
-//const fetch = require('node-fetch');
+const fetch = import('node-fetch');
 
 
 class ResourceInfo {
