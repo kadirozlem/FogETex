@@ -3,31 +3,55 @@ const Config = require("../Config");
 const axios = require('axios')
 
 
-
-const DeviceIP=[
+const DeviceIP = [
     "192.168.2.103",
     "164.92.168.129"
 ]
 
 
-function UpdateDevice(ip){
-    axios.get(`http://${ip}:${Config.Port}/DeviceStatus`)
+function UpdateDevice(ip) {
+    axios.get(`http://${ip}:${Config.Port}/UpdateDevice`, {timeout: 3000})
 
-        .then(res => console.log(res.data))
-        .catch(err => console.log(err))
+        .then(res => {
+            const data = res.data;
+            data.IP = ip;
+            data.Port = Config.Port;
+            console.log(data);
+
+        })
+        .catch(err => {
+            if(err.code =="ECONNRESET" ||err.code == "ECONNABORTED"){
+                console.log(`Device Closed: ${ip}:${Config.Port}`);
+            }else{
+                console.log(err)}
+            });
 }
 
-function UpdateDevices(){
-    UpdateDevice(DeviceIP[0]);
-}
-function CheckDevices(){
-
+function UpdateDevices() {
+    DeviceIP.forEach(x=>UpdateDevice(x));
 }
 
+function CheckDevices() {
+    DeviceIP.forEach(ip => {
+        axios.get(`http://${ip}:${Config.Port}/DeviceStatus`, {timeout: 3000})
 
-function main(){
-    if(process.argv.length>2){
-        switch (process.argv[2].trim().toLowerCase()){
+            .then(res => {
+                const data = res.data;
+                data.IP = ip;
+                data.Port = Config.Port;
+                console.log(data);
+
+            }).catch(err => {
+
+            console.log(err);
+
+        });
+    });
+}
+
+function main() {
+    if (process.argv.length > 2) {
+        switch (process.argv[2].trim().toLowerCase()) {
             case 'update':
                 UpdateDevices();
                 break;
@@ -37,7 +61,7 @@ function main(){
             default:
                 console.log('main(): Command cannot matched!');
         }
-    }else{
+    } else {
         console.log('main(): Command is missing!');
     }
 }
