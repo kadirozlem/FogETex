@@ -2,7 +2,8 @@ var os = require("os");
 var Config=require("./Config");
 const microtime = require("microtime");
 const { Manager  } = require("socket.io-client");
-const fetch = import('node-fetch');
+const axios = require('axios')
+
 
 
 class ResourceInfo {
@@ -85,8 +86,7 @@ class Resources {
     }
 
     async ConnectParent(){
-        const response =fetch('https://jsonplaceholder.typicode.com/users');
-        const data = await response.json();
+        //Axios add
 
         const manager = new Manager("ws://localhost:"+Config.Port, {
             autoConnect: true,
