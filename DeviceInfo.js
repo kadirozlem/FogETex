@@ -80,8 +80,8 @@ var country_info = lookup.byInternet(geo.country);
 module.exports = {
     DeviceType: Config.DeviceType,
     DeviceTypeString: DeviceTypes.GetDeviceName(Config.DeviceType),
-    PublicIp: publicIP,
-    LocalIp: localIP,
+    PublicIP: publicIP,
+    LocalIP: localIP,
     Country: country_info.country,
     Continent: country_info.continent,
     Region: geo.region,

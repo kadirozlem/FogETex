@@ -1,21 +1,15 @@
 #Update Packages
 sudo apt update
+sudo apt upgrade
 
-#Run the nvm installer
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+#Install CURL
+sudo apt install -y curl
 
-#Update Profile Configuration
-export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+#Grab The Setup Script for NodeJS 18
+curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 
-#Reload the shell configuration
-source ~/.bashrc
-
-#Check nvm version
-nvm -v
-
-#Install NodeJS 18.15.0 and NPM version 9.5.0
-nvm install v18.15.0
+#Install NodeJS
+sudo apt install -y nodejs
 
 #Check NodeJS version
 node -v

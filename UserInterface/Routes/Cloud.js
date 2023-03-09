@@ -1,5 +1,6 @@
 const express = require("express");
 const Helper = require("../../Helper");
+const {response} = require("express");
 var router = express.Router();
 
 router.get('/',  (req, res, next)=>{
@@ -9,8 +10,8 @@ router.get('/',  (req, res, next)=>{
 });
 
 router.get('/AssignFogNode',(req, res, next)=>{
-   if(!req.query.lat && !req.query.lon){
-      res.send('Missing Parameter');
+   if(!req.query.lat || !req.query.lon){
+      res.json({err: 'Missing Parameter'})
    }
 
    const user_lat = parseFloat(req.query.lat);
@@ -20,27 +21,27 @@ router.get('/AssignFogNode',(req, res, next)=>{
    const brokers = req.app.FogETex.Socket.fog_children;
    for (const key in brokers){
       if(brokers[key].deviceInfo.PublicIp == user_ip){
-         res.json({IP: brokers[key].deviceInfo.PublicIp, err: null });
+         res.json({IP: brokers[key].deviceInfo.LocalIP,type:'LAN',distance:0, err: null });
          return;
       }
    }
 
-   const closest_node = null
+   let closest_node = null
    for (const key in brokers){
+      const broker= brokers[key];
+      const distance = Helper.CalculateDistance(user_lat,user_lon,...broker.DeviceInfo.Location);
 
-
-      if(brokers[key].deviceInfo.PublicIp == user_ip){
-         res.json({IP: brokers[key].deviceInfo.PublicIp, err: null });
-         return;
+      if(!closest_node || closest_node.distance > distance){
+         closest_node = {IP:broker.deviceInfo.PublicIP, type: 'WAN', distance:distance, err: null };
       }
    }
 
+   if(closest_node){
+      res.json(closest_node);
+   }else{
+      res.json({err: 'No connected device found!'})
+   }
 
-
-
-
-   req.app.FogETex;
-   res.send(user_ip)
    //https://www.movable-type.co.uk/scripts/latlong.html
 });
 

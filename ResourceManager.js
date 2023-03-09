@@ -2,7 +2,7 @@ var os = require("os");
 var Config=require("./Config");
 const microtime = require("microtime");
 const { Manager  } = require("socket.io-client");
-const axios = require('axios')
+const axios = require('axios');
 
 
 
@@ -75,27 +75,59 @@ class Resources {
         this.tick();
         var t = this;
         this.timer=setInterval(function(){t.tick()},Config.RM_SamplingPeriod);
-        if(Config.DeviceType != Config.DeviceTypes.Cloud){
-            this.ConnectParent();
+        if(Config.DeviceType == Config.DeviceTypes.Broker){
+            this.ConnectParent(Config.CloudIp);
+        }else if(Config.DeviceType = Config.DeviceTypes.Worker){
+            this.FindBrokerIPAndConnect()
         }
     }
 
     SendResourceInfo(info){
         //Send it to the User Interface
+        if(this.Socket){
+            this.Socket.emit("resource_info",info);
+        }
         this.FogETex.Socket.ui_clients['Home'].forEach(element => element.emit("resource_info", info))
     }
 
-    async ConnectParent(){
-        //Axios add
+    FindBrokerIPAndConnect(){
+        const resourceObj = this;
+        console.log('Trying to find Broker Ip.');
+        axios.get(`http://${Config.CloudIp}:${Config.Port}/Cloud/GetBrokerIp`, {timeout: 3000})
+            .then(res => {
+                if(res.err){
+                    console.log("Broker IP couldn't find.")
+                    console.log(err);
+                    console.log()
+                    setTimeout(resourceObj.FindBrokerIPAndConnect,1000);
+                }else{
+                    console.log("Broker IP has been found!")
+                    resourceObj.ConnectParent(res.LocalIP);
+                }
+            })
+            .catch(err => {
+                console.log("ResourceManager.FindBrokerIPAndConnect(): Connection error.")
+                console.log(err);
+                console.log();
+                setTimeout(resourceObj.FindBrokerIPAndConnect,1000);
+            });
+    }
 
-        const manager = new Manager("ws://localhost:"+Config.Port, {
+    ConnectParent(ip){
+        const resourceObj = this;
+        const manager = new Manager(`ws://${ip}:${Config.Port}`, {
             autoConnect: true,
             query: {
-                DeviceType: Config.DeviceTypes.Worker
+                DeviceType: Config.DeviceType
             }
         });
+        const socket = this.FogETex.ResourceSocket = this.Socket = manager.socket("/");
 
-        this.Socket = manager.socket("/");
+        socket.on("connect",()=>{
+            console.log("Resource Socket Connected!");
+            socket.emit('device_info', resourceObj.FogETex.DeviceInfo );
+        });
+
     }
 
     GetBulkData(){

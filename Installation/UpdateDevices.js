@@ -1,10 +1,10 @@
 const Config = require("../Config");
 
-const axios = require('axios')
+const axios = require('axios');
 
 
 const DeviceIP = [
-    "192.168.2.103",
+    "192.168.2.101",
     "164.92.168.129"
 ]
 
@@ -17,7 +17,6 @@ function UpdateDevice(ip) {
             data.IP = ip;
             data.Port = Config.Port;
             console.log(data);
-
         })
         .catch(err => {
             if(err.code =="ECONNRESET" ||err.code == "ECONNABORTED"){
