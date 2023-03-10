@@ -95,21 +95,22 @@ class Resources {
         console.log('Trying to find Broker Ip.');
         axios.get(`http://${Config.CloudIp}:${Config.Port}/Cloud/GetBrokerIp`, {timeout: 3000})
             .then(res => {
-                if(res.err){
+                if(res.data.err){
                     console.log("Broker IP couldn't find.")
-                    console.log(err);
+                    console.log(res.data.err);
                     console.log()
-                    setTimeout(resourceObj.FindBrokerIPAndConnect,1000);
+                    setTimeout(()=>{resourceObj.FindBrokerIPAndConnect()},1000);
                 }else{
                     console.log("Broker IP has been found!")
-                    resourceObj.ConnectParent(res.LocalIP);
+                    console.log("Broker IP: "+res.data.LocalIP)
+                    resourceObj.ConnectParent(res.data.LocalIP);
                 }
             })
             .catch(err => {
                 console.log("ResourceManager.FindBrokerIPAndConnect(): Connection error.")
                 console.log(err);
                 console.log();
-                setTimeout(resourceObj.FindBrokerIPAndConnect,1000);
+                setTimeout(()=>{resourceObj.FindBrokerIPAndConnect()},1000);
             });
     }
 

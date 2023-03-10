@@ -51,7 +51,7 @@ router.get('/GetBrokerIp',(req,res, next)=>{
    const brokers = req.app.FogETex.Socket.fog_children;
    for (const key in brokers){
       if(brokers[key].DeviceInfo.PublicIP == user_ip){
-         res.json({LocalIp: brokers[key].DeviceInfo.PublicIP, err: null });
+         res.json({LocalIP: brokers[key].DeviceInfo.LocalIP, err: null });
          return;
       }
    }
