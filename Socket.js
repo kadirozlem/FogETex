@@ -24,14 +24,14 @@ module.exports=function (FogEtex) {
     }
 
     io.on("connection", (socket) => {
-        socket.devicetype= parseInt(socket.handshake.query.DeviceType || Config.DeviceTypes.User);
+        socket.DeviceType= parseInt(socket.handshake.query.DeviceType || Config.DeviceTypes.User);
         //If client is User, get small id to decrease communication message
-        if(socket.devicetype == Config.DeviceTypes.User){
+        if(socket.DeviceType == Config.DeviceTypes.User){
             socket.userId = io.GetCandidateUserId();
             socket.FileName =  Helper.DateTimeAsFilename()+'_'+socket.id;
             socket.emit('filename', socket.FileName);
         }
-        console.log(Config.DeviceTypes.GetDeviceName(socket.devicetype)+" connected");
+        console.log(Config.DeviceTypes.GetDeviceName(socket.DeviceType)+" connected");
 
         if(socket.DeviceType==Config.DeviceTypes.Worker){
             io.fog_children[socket.id] = { DeviceInfo: null, ResourceInfos:[]}

@@ -4,7 +4,7 @@ const axios = require('axios');
 
 
 const DeviceIP = [
-    "192.168.2.101",
+    "192.168.1.101",
     "164.92.168.129"
 ]
 

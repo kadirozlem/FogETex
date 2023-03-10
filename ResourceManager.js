@@ -77,7 +77,7 @@ class Resources {
         this.timer=setInterval(function(){t.tick()},Config.RM_SamplingPeriod);
         if(Config.DeviceType == Config.DeviceTypes.Broker){
             this.ConnectParent(Config.CloudIp);
-        }else if(Config.DeviceType = Config.DeviceTypes.Worker){
+        }else if(Config.DeviceType == Config.DeviceTypes.Worker){
             this.FindBrokerIPAndConnect()
         }
     }
@@ -126,6 +126,14 @@ class Resources {
         socket.on("connect",()=>{
             console.log("Resource Socket Connected!");
             socket.emit('device_info', resourceObj.FogETex.DeviceInfo );
+        });
+
+        socket.on("disconnect", (reason) => {
+            console.log(reason);
+        });
+
+        socket.on("connect_error", () => {
+            console.log("Cannot connect");
         });
 
     }

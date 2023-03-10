@@ -1,7 +1,7 @@
 const { Manager  } = require("socket.io-client");
 const Config = require("../Config");
-
-const manager = new Manager("ws://localhost:"+Config.Port, {
+const url = "ws://192.168.1.20:"+Config.Port;
+const manager = new Manager(url, {
     autoConnect: true,
     query: {
         DeviceType: Config.DeviceTypes.Worker
@@ -22,6 +22,7 @@ socket.on("disconnect", (reason) => {
     console.log(reason);
 });
 
-socket.on("connect_error", () => {
+socket.on("connect_error", (err) => {
     console.log("Cannot connect");
+    console.log(err);
 });
