@@ -39,7 +39,7 @@ module.exports=function (FogEtex) {
             socket.on('device_info', (device_info)=>{
                 io.fog_children[socket.id].DeviceInfo = device_info;
                 io.to('iu').emit('device_info', {SocketId : socket.id, DeviceInfo:device_info} );
-                FogEtex.ResourceManager.Emit('worker_device_info', socket.id, device_info);
+                FogEtex.ResourceManager.Socket.emit('worker_device_info', socket.id, device_info);
             });
 
             socket.on('resource_info', (resource_info)=>{
@@ -48,12 +48,14 @@ module.exports=function (FogEtex) {
                 if (arr.length > Config.RM_BufferSize){
                     arr.shift()
                 }
-                io.ui_clients[socket.id].forEach(x => x.emit('resource_info', resource_info));
-                FogEtex.ResourceManager.Emit('worker_resource_info', socket.id, resource_info);
+                if(io.ui_clients[socket.id]){
+                    io.ui_clients[socket.id].forEach(x => x.emit('resource_info', resource_info));
+                }
+                FogEtex.ResourceManager.Socket.emit('worker_resource_info', socket.id, resource_info);
             });
 
             socket.on('disconnect',(reason) =>{
-                FogEtex.ResourceManager.Emit('worker_disconnected', socket.id, reason);
+                FogEtex.ResourceManager.Socket.emit('worker_disconnected', socket.id, reason);
                 io.to('iu').emit('device_disconnected',{SocketId:socket.id, Reason:reason});
                 const key = socket.id;
                 if(io.fog_children[key]){
@@ -97,7 +99,6 @@ module.exports=function (FogEtex) {
                 if(ui_clients) {
                     ui_clients.forEach(x => x.emit('resource_info', resource_info));
                 }
-                FogEtex.ResourceManager.emit('worker_resource_info', socket.id, resource_info);
             });
 
             socket.on('worker_disconnected', (socket_id, reason)=>{

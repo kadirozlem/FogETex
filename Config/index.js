@@ -35,6 +35,6 @@ module.exports = {
     WorkerCPULimit:0.7,
     WorkerMemoryLimit : 0.7,
     UserPackageDirectory: "./UserPackage/",
-    DeviceType: DeviceTypes.Worker,
+    DeviceType: DeviceTypes.Broker,
     DeviceTypes: DeviceTypes
 };
