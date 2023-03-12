@@ -1,6 +1,6 @@
 const { Manager  } = require("socket.io-client");
 const Config = require("../Config");
-const url = "ws://192.168.1.20:"+Config.Port;
+const url = "http://192.168.1.101:"+Config.Port;
 const manager = new Manager(url, {
     autoConnect: true,
     query: {

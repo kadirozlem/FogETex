@@ -97,7 +97,7 @@ module.exports=function (FogEtex) {
                 if(ui_clients) {
                     ui_clients.forEach(x => x.emit('resource_info', resource_info));
                 }
-                FogEtex.ResourceManager.Emit('worker_resource_info', socket.id, resource_info);
+                FogEtex.ResourceManager.emit('worker_resource_info', socket.id, resource_info);
             });
 
             socket.on('worker_disconnected', (socket_id, reason)=>{

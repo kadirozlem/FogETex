@@ -116,7 +116,7 @@ class Resources {
 
     ConnectParent(ip){
         const resourceObj = this;
-        const manager = new Manager(`ws://${ip}:${Config.Port}`, {
+        const manager = new Manager(`http://${ip}:${Config.Port}`, {
             autoConnect: true,
             query: {
                 DeviceType: Config.DeviceType
