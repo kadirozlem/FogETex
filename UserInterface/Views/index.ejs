@@ -949,6 +949,29 @@
 </script>
 <!--Script Area-->
 <script>
+    FogSidebar= function (socketId, deviceInfo){
+        this.SocketId=socketId;
+        this.DeviceInfo= deviceInfo;
+        this.Initialize = function (){
+            const div = `<li id="${this.SocketId}"><a class="sidebar-sub-toggle"><i class="ti-plug"></i> ${this.DeviceInfo.PublicIP} <span class="sidebar-collapse-icon ti-angle-down"></span></a>
+                            <ul class="fogdevicelist">
+
+                            </ul>
+                        </li>`;
+            if($('.fognode').length>0){
+                $('.fognode').last().after(div);
+            }else {
+                $('#foglist').after(div);
+            }
+
+        }
+
+        this.AddDevice= function (socketId, deviceInfo, isBroker=false){
+            const div = `<li><a href="ui-typography.html">Typography</a></li>`;
+            $("#"+this.SocketId+" .fogdevicelist").append(div);
+        }
+    }
+
     ChartObject = function (canvasId, title, datasize = 102, labels = null) {
         this.canvasId = canvasId;
         this.title = title;
