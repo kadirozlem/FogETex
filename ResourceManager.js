@@ -127,6 +127,13 @@ class Resources {
         socket.on("connect",()=>{
             console.log("Resource Socket Connected!");
             socket.emit('device_info', resourceObj.FogETex.DeviceInfo );
+            const fog_children = resourceObj.FogETex.Socket.fog_children;
+            if(fog_children){
+                for(const key in fog_children){
+                    const child = fog_children[key];
+                    socket.emit('worker_device_info', key, child.DeviceInfo, child.ResourceInfos )
+                }
+            }
         });
 
         socket.on("disconnect", (reason) => {
