@@ -23,6 +23,7 @@ router.get('/', function (req, res, next) {
         title: "FogETex",
         UserType: Config.DeviceTypes.UserInterface,
         DeviceInfo: FogETex.DeviceInfo,
+        DeviceTypes: Config.DeviceTypes,
         FogChildren: FogChildren,
         Directory: 'Home'
     })

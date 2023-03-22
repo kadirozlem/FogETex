@@ -267,6 +267,7 @@
 </script>
 <!--Script Area-->
 <script>
+    <% if(DeviceInfo.DeviceType == DeviceTypes.Cloud){ %>
     FogSidebar= function (socketId, deviceInfo){
         this.SocketId=socketId;
         this.DeviceInfo= deviceInfo;
@@ -289,6 +290,24 @@
             $("#"+this.SocketId+" .fogdevicelist").append(div);
         }
     }
+
+    <% } else if(DeviceInfo.DeviceType == DeviceTypes.Broker){ %>
+        FogSidebar= function (socketId, deviceInfo){
+            this.SocketId=socketId;
+            this.DeviceInfo= deviceInfo;
+            this.Initialize = function (){
+                const div = `<li id="${this.SocketId}" class="fognode"><a class="sidebar-sub-toggle"><i class="ti-plug"></i> ${this.DeviceInfo.LocalIP}</a>
+
+                            </li>`;
+                if($('.fognode').length>0){
+                    $('.fognode').last().after(div);
+                }else {
+                    $('#fognodelabel').after(div);
+                }
+
+            }
+        }
+    <% } %>
 
     ChartObject = function (canvasId, title, datasize = 102, labels = null) {
         this.canvasId = canvasId;
@@ -381,6 +400,7 @@
 
 
 </script>
+<% if(DeviceInfo.DeviceType != DeviceTypes.Worker){ %>
 <script>
     FogChildren = <%- JSON.stringify(FogChildren) %>
     ReloadFogChildren= function () {
@@ -405,9 +425,10 @@
             $('#fognodelabel').after(div);
         }
     }
+
     ReloadFogChildren();
 </script>
-
+<%}%>
 <script>
 
     Core_CircleBars = []

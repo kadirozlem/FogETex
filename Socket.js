@@ -103,7 +103,7 @@ module.exports=function (FogEtex) {
 
             socket.on('worker_disconnected', (socket_id, reason)=>{
                 io.to('iu').emit('device_disconnected',{SocketId:socket_id, ParentId: socket.id,Reason:reason});
-                const key = socket.id + _ + socket_id;
+                const key = socket.id + "_" + socket_id;
                 if(io.fog_children[key]){
                     delete io.fog_children[key];
                 }
