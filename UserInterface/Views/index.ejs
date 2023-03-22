@@ -231,94 +231,12 @@
 
                     </div>
                 </div>
-                <div class="row">
-                    <div class="col-lg-8">
-                        <div class="card alert">
-                            <div class="card-title">
-                                <h4><i class="fa fa-area-chart"></i> CPU Load</h4>
-                            </div>
-                            <div class="cpu-load-chart">
-                                <div id="cpu-load" class="cpu-load"></div>
-                            </div>
-                        </div>
-                        <!-- /# card -->
-                    </div>
-                    <!-- /# column -->
-                    <div class="col-md-4">
-                        <div class="card text-center">
-                            <div class="m-t-10">
-                                <h4 class="card-title"><i class="fa fa-pie-chart"></i> Daily Work</h4>
-                            </div>
-                            <div class="widget-card-circle pr m-t-20 m-b-20" id="info-circle-card">
-                                <i class="ti-control-shuffle pa"></i>
-                            </div>
-                            <ul class="widget-line-list m-b-15">
-                                <li class="border-right">50% <br><span class="color-success"> Completed</span></li>
-                                <li>50% <br><span class="color-danger">Left</span></li>
-                            </ul>
-                        </div>
-                    </div>
 
-
-                </div>
-
-                <div class="row">
-                    <div class="col-lg-3">
-                        <div class="card">
-                            <div class="stat-widget-two">
-                                <div class="stat-content">
-                                    <div class="stat-text"><i class="fa fa-child"></i> Steps Today</div>
-                                    <div class="stat-digit"> 85</div>
-                                </div>
-                                <div class="progress">
-                                    <div class="progress-bar progress-bar-success w-85" role="progressbar"
-                                         aria-valuenow="85" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3">
-                        <div class="card">
-                            <div class="stat-widget-two">
-                                <div class="stat-content">
-                                    <div class="stat-text"><i class="fa fa-child"></i> Steps This Week</div>
-                                    <div class="stat-digit"><%= (DeviceInfo.SystemInformation.Memory / Math.pow(2, 30)).toFixed(2) %>
-                                        GB
-                                    </div>
-                                </div>
-                                <div class="progress">
-                                    <div class="progress-bar progress-bar-primary" role="progressbar"
-                                         aria-valuenow="8264984" aria-valuemin="0"
-                                         aria-valuemax="<%= DeviceInfo.SystemInformation.Memory / Math.pow(2, 10) %>"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3">
-                        <div class="card">
-                            <div class="stat-widget-two">
-                                <div class="stat-content">
-                                    <div class="stat-text"><i class="fa fa-check-square"></i> Task Completed</div>
-                                    <div class="stat-digit"> 650</div>
-                                </div>
-                                <div class="progress">
-                                    <div class="progress-bar progress-bar-danger w-65" role="progressbar"
-                                         aria-valuenow="65" aria-valuemin="0" aria-valuemax="100"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- /# card -->
-                    </div>
-                    <!-- /# column -->
-                </div>
-                <div>
-                    <%= JSON.stringify(DeviceInfo) %>
-                </div>
 
                 <div class="row" id="website_footer">
                     <div class="col-lg-12">
                         <div class="footer">
-                            <p>2020 © Soft Sensors Lab. - <a href="https://softsensorslab.itu.edu.tr" target="_blank">softsensorslab.itu.edu.tr</a>
+                            <p>2023 © Soft Sensors Lab. - <a href="https://softsensorslab.itu.edu.tr" target="_blank">softsensorslab.itu.edu.tr</a>
                             </p>
                         </div>
                     </div>
@@ -337,606 +255,6 @@
 
 <%- include('./partials/scripts') %>
 
-<!--<script src="/javascripts/modules/SocketCodes.js"></script>-->
-<!--===============================================================================================-->
-
-
-<!--<script src="/javascripts/helper.js"></script>-->
-<script>
-    CircleProgress = function (name, color = "#a389d5", size = 100) {
-        $('#info-circle-card').circleProgress({
-            value: 0.70,
-            size: 100,
-            fill: {
-                gradient: ["#a389d5"]
-            }
-        });
-
-        this.Change = function (value) {
-            $(name).circleProgress({value: value, animationStartValue: $(name).circleProgress('value')})
-        }
-    }
-
-    circleprogress = new CircleProgress('#info-circle-card');
-
-
-</script>
-
-<script>
-    $('#enableEditable').on('click', function () {
-        var obj = $(this);
-        var status = obj.data('status');
-        if (status == 'enable') {
-            $.fn.editable.defaults.disabled = false;
-            $('.editable').editable('option', 'disabled', false);
-            obj.data('status', 'disable').removeClass('btn-success').addClass('btn-danger').html("Disable");
-            $('#chart_row').addClass('modifiable');
-        } else {
-            $.fn.editable.defaults.disabled = true;
-            $('.editable').editable('option', 'disabled', true);
-            obj.data('status', 'enable').removeClass('btn-danger').addClass('btn-success').html("Enable");
-            ;
-            $('#chart_row').removeClass('modifiable');
-
-        }
-    });
-
-
-    function msToTime(duration) {
-        var milliseconds = parseInt((duration % 1000)),
-            seconds = Math.floor((duration / 1000) % 60),
-            minutes = Math.floor((duration / (1000 * 60)) % 60),
-            hours = Math.floor((duration / (1000 * 60 * 60)) % 24);
-
-        hours = (hours < 10) ? "0" + hours : hours;
-        minutes = (minutes < 10) ? "0" + minutes : minutes;
-        seconds = (seconds < 10) ? "0" + seconds : seconds;
-        milliseconds = (milliseconds >= 100) ? milliseconds : (milliseconds >= 10) ? '0' + milliseconds : '00' + milliseconds;
-        return hours + ":" + minutes + ":" + seconds + "." + milliseconds;
-    }
-
-    function secToTime(duration) {
-        var seconds = Math.floor((duration) % 60),
-            minutes = Math.floor((duration / (60)) % 60),
-            hours = Math.floor((duration / (60 * 60)) % 24);
-
-        hours = (hours < 10) ? "0" + hours : hours;
-        minutes = (minutes < 10) ? "0" + minutes : minutes;
-        seconds = (seconds < 10) ? "0" + seconds : seconds;
-        return hours + ":" + minutes + ":" + seconds;
-    }
-
-    function updateHistoryTable() {
-        showLoading();
-        $.get('http://localhost:27592/api/getdata', function (data) {
-            if (!data.err) {
-                $('#historyTable').bootstrapTable('removeAll');
-                var rows = [];
-                for (var i = 0; i < data.docs.length; i++) {
-                    var data_doc = data.docs[i];
-                    var frequency = data_doc.Frequency ? data_doc.Frequency : 50;
-                    var duration = data_doc.sensordata / frequency;
-                    var operation = `
-                                    <a class='history_icons play_historical_data' data-id="${data_doc._id}" data-frequency="${frequency}" data-length="${data_doc.sensordata}" target="_blank"><i class="fa fa-play-circle" title="Play"/></a>
-                                    <a class='history_icons' href="http://localhost:27592/api/getcsv?id=${data_doc._id}" target="_blank"><i class="fa fa-file-excel-o" title="csv"/></a>
-                                    <a class='history_icons' href="http://localhost:27592/api/getcsv?id=${data_doc._id}&info=true" target="_blank"><i class="fa fa-download" title="Backup"/></a>
-                                    <a class='history_icons delete_historical_data' data-id="${data_doc._id}" target="_blank"><i class="fa fa-trash" title="Delete"/></a>
-`;
-
-                    rows.push({
-                        no: i + 1,
-                        portname: data_doc.PortName,
-                        sensorcount: data_doc.SensorCount,
-                        startdate: data_doc.StartDate ? data_doc.StartDate.replace('T', ' ').replace('Z', '') : '',
-                        duration: msToTime(duration * 1000),
-                        operation: operation
-                    });
-                }
-                $('#historyTable').bootstrapTable('load', rows);
-                $('.play_historical_data').on('click', function () {
-                    var id = $(this).data('id');
-                    Slider_Frequency = parseInt($(this).data('frequency'));
-                    Slider_StartIntex = 0;
-                    Slider_StopIndex = parseInt($(this).data('length'));
-                    SliderStartStopTime();
-                    $('#replayDataID').val(id);
-                    $('#isCircularCheckbox').prop('checked', false);
-                    $('#replay_modal').modal('show');
-                    //var op = new SocketCodes.ReplayConfiguration(id, SocketCodes.WROperation.Started);
-                    //socket.emit('control', op);
-                })
-                $('.delete_historical_data').on('click', function () {
-                    var id = $(this).data('id');
-                    $('#deletePermemanentlyBtn').data('id', id);
-                    $('#deleteHistoricalData').modal();
-                });
-            } else {
-                errorNotify("An error occured on Getting Historical Data Operation!");
-            }
-            hideLoading();
-        });
-    }
-
-    $('#deletePermemanentlyBtn').on('click', function () {
-        var id = $(this).data('id');
-        console.log(id);
-        $.get('http://localhost:27592/api/deletebyid?id=' + id, function (data) {
-            if (data.err) {
-                errorNotify("An error occured on Deleting Historical Data Operation!");
-            } else {
-                successNotify("Historical data was deleted.");
-            }
-            $('#deleteHistoricalData').modal('hide');
-            updateHistoryTable();
-        })
-    });
-
-    $('#settings_modal .close-btn').on('click', function () {
-        $('#setting_modal_li').removeClass("active");
-        return true;
-    });
-    $('#historyTable').bootstrapTable({
-        classes: 'table table-hover table',
-        'show-pagination-switch': "true",
-        pagination: "true"
-    });
-
-    $('#history_modal').on('show.bs.modal', function () {
-        updateHistoryTable();
-    })
-
-
-</script>
-
-<script>
-
-    $('#connectionIcon').popover();
-
-    var ActivePorts = {};
-    var TempPorts = {};
-    var ReplayObjects = {};
-    var SerialPort = function (deviceInfo) {
-        this.deviceInfo = deviceInfo;
-        this.status;
-        CreateCharts(deviceInfo);
-        this.getKey = function () {
-            return this.deviceInfo.ProjectId + "_" + this.deviceInfo.DeviceId;
-        }
-
-        this.closeOperation = function () {
-
-        }
-
-        this.AddToSideBar = function () {
-            var li = '<li><a href="#" class="startserialport" data-id="' + this.getKey() + '">' + this.deviceInfo.PortName + '</a></li>'
-            $('#serialportlist').append(li);
-            this.ChangeStartBtnStatus();
-        }
-
-        this.ChangeStartBtnStatus = function () {
-            var btn = $('.startserialport[data-id=' + this.getKey() + ']');
-            if (this.deviceInfo.StartRead) {
-                btn.css('color', 'lightgreen');
-            } else {
-                btn.css('color', 'red');
-            }
-        }
-
-        this.AddWriteBtn = function () {
-            var btn = `<li class="header-icon dib" id="${this.getKey() + 'write'}">
-                            <i class="fa fa-hdd-o" id="writeBtn" style="color:red" data-title="${this.deviceInfo.PortName}" data-content="Write operation stopped" data-trigger="hover" data-toggle="popover" data-placement="bottom"></i>
-                        </li>`
-
-            $('#icon_list').prepend(btn);
-            this.ChangeWriteBtnStatus();
-            $("#" + this.getKey() + 'write i').popover();
-            var obj = this;
-            $("#" + this.getKey() + 'write i').on('click', function () {
-                console.log("Girdi");
-                if (obj.deviceInfo.StartWrite) {
-                    var op = new SocketCodes.WriteConfiguration(SocketCodes.WROperation.Stopped, obj.deviceInfo.ProjectId, obj.deviceInfo.DeviceId, 1);
-                    socket.emit('control', op);
-                } else {
-                    var op = new SocketCodes.WriteConfiguration(SocketCodes.WROperation.Started, obj.deviceInfo.ProjectId, obj.deviceInfo.DeviceId, 1);
-                    socket.emit('control', op);
-                }
-            });
-
-        }
-
-        this.ChangeWriteBtnStatus = function () {
-            var btn = $('#' + this.getKey() + 'write i');
-            if (this.deviceInfo.StartWrite) {
-                btn.css('color', 'lightgreen');
-                btn.attr('data-content', 'Write operation started');
-            } else {
-                btn.css('color', 'red');
-                btn.attr('data-content', 'Write operation stopped');
-            }
-        }
-    }
-
-    TestFunction = function () {
-        info = {
-            Id: 'kadir', PortName: 'Test', Frequency: 50, Configuration: {
-                StartTime: 250, EndTime: 24531
-            }
-        };
-        new ReplayData(info).Initialize();
-    }
-
-    var ReplayData = function (deviceInfo) {
-        this.DeviceInfo = deviceInfo;
-        this.status;
-        this.Index = null;
-
-        this.Initialize = function () {
-            CreateCharts(deviceInfo);
-            if (ReplayObjects[this.getKey()]) {
-                ReplayObjects[this.getKey()].Stop();
-            }
-            ReplayObjects[this.getKey()] = this;
-            $('#')
-            this.AddBtn();
-        }
-
-        this.getKey = function () {
-            return this.DeviceInfo.Id;
-        }
-
-        this.AddBtn = function () {
-            var btn = `<li class="header-icon dib" id="${this.getKey() + 'replay'}">
-                            <i class="fa fa-play-circle icon_left_border" id="pauseBtn" style="color:red" data-id="${this.getKey()}" data-title="${this.DeviceInfo.PortName}" data-content="Play operation paused!" data-trigger="hover" data-toggle="popover" data-placement="bottom"></i>
-                            <span class="time" data-title="${this.DeviceInfo.PortName} Play Interval" data-content="${secToTime(this.DeviceInfo.Configuration.StartTime)}-${secToTime(this.DeviceInfo.Configuration.StopTime)}" data-trigger="hover" data-toggle="popover" data-placement="bottom">00:00:00</span>
-                            <i class="fa fa-stop-circle icon_right_border" id="stopBtn" style="color:red" data-id="${this.getKey()}" data-title="${this.DeviceInfo.PortName}" data-content="Stop replay operation!" data-trigger="hover" data-toggle="popover" data-placement="bottom"></i>
-
-                        </li>`
-
-            $('#icon_list').prepend(btn);
-            this.ChangeBtnStatus();
-            $("#" + this.getKey() + 'replay i').popover();
-            $("#" + this.getKey() + 'replay span').popover();
-            var obj = this;
-            $("#" + this.getKey() + 'replay #pauseBtn').on('click', function () {
-                var id = $(this).data('id');
-                if (obj.DeviceInfo.StartReplay) {
-                    var op = new SocketCodes.ReplayConfiguration(id, SocketCodes.WROperation.Paused);
-                    socket.emit('control', op);
-                } else {
-                    var op = new SocketCodes.ReplayConfiguration(id, SocketCodes.WROperation.Started);
-                    socket.emit('control', op);
-                }
-            });
-
-            $("#" + this.getKey() + 'replay #stopBtn').on('click', function () {
-                var id = $(this).data('id');
-
-                var op = new SocketCodes.ReplayConfiguration(id, SocketCodes.WROperation.Stopped);
-                socket.emit('control', op);
-            });
-
-        }
-
-        this.ChangeBtnStatus = function () {
-            var btn = $('#' + this.getKey() + 'replay #pauseBtn');
-            console.log(btn);
-            if (this.DeviceInfo.StartReplay) {
-                btn.removeClass('fa-play-circle').removeClass('fa-pause-circle').addClass('fa-pause-circle')
-                btn.css('color', 'orange');
-                btn.attr('data-content', 'Replay operation started');
-            } else {
-                btn.removeClass('fa-pause-circle').removeClass('fa-play-circle').addClass('fa-play-circle')
-                btn.css('color', 'ligthgreen');
-                btn.attr('data-content', 'Replay operation paused');
-            }
-        }
-
-        this.ChangeTime = function (index) {
-            if (this.Index) {
-                if (index % this.DeviceInfo.Frequency == 0) {
-                    var sec = parseInt(index / this.DeviceInfo.Frequency);
-                    $('#' + this.getKey() + 'replay .time').html(secToTime(sec));
-                }
-            } else {
-                var sec = parseInt(index / this.DeviceInfo.Frequency);
-                $('#' + this.getKey() + 'replay .time').html(secToTime(sec));
-            }
-            this.Index = index;
-        }
-        this.Start = function () {
-            this.DeviceInfo.StartReplay = true;
-            this.ChangeBtnStatus();
-        }
-        this.Pause = function () {
-            this.DeviceInfo.StartReplay = false;
-            this.ChangeBtnStatus();
-        }
-        this.Stop = function () {
-            $('#' + this.getKey() + 'replay').remove();
-            var charts = DeviceLists[this.getKey()];
-            for (var i = 0; i < charts.length; i++) {
-                charts[i].Remove();
-            }
-            delete DeviceLists[this.getKey()];
-            $('.popover').remove();
-            delete ReplayObjects[this.getKey()];
-        }
-    }
-
-    function updateSerialPortList() {
-        $('#serialportlist').empty();
-        if (Object.keys(ActivePorts).length > 0) {
-            for (var key in ActivePorts) {
-                ActivePorts[key].AddToSideBar();
-            }
-            $('.startserialport').on('click', function () {
-                    var key = $(this).data('id');
-                    var port = ActivePorts[key];
-                    if (!port.deviceInfo.StartRead) {
-                        var op = new SocketCodes.ReadConfiguration(SocketCodes.WROperation.Started, port.deviceInfo.ProjectId, port.deviceInfo.DeviceId, 1);
-                        socket.emit('control', op);
-                    } else {
-                        var op = new SocketCodes.ReadConfiguration(SocketCodes.WROperation.Stopped, port.deviceInfo.ProjectId, port.deviceInfo.DeviceId, 1);
-                        socket.emit('control', op);
-
-                    }
-                    return false;
-                }
-            )
-
-        } else {
-            var li = '<li><a href="#" onclick="return false;">No devices are connected!</a></li>'
-            $('#serialportlist').append(li);
-        }
-    }
-
-    function DeviceStatusOperations(data) {
-        switch (data.Status) {
-            case SocketCodes.DeviceStatus.NewDeviceFound:
-                if (data.Message) {
-                    successNotify(data.Message, "New Device Found");
-                } else {
-                    successNotify("Your device is detected on " + data.DeviceInfo.PortName + "!", "New Device Found");
-                }
-
-                var newdevice = new SerialPort(data.DeviceInfo);
-                ActivePorts[newdevice.getKey()] = newdevice;
-                updateSerialPortList();
-
-                break;
-            case SocketCodes.DeviceStatus.DeviceUnplugged:
-                if (data.Message) {
-                    warningNotify(data.Message, "Device Unplugged");
-                } else {
-                    warningNotify("New device is unplugged on " + data.DeviceInfo.PortName + "!", "Device Unplugged");
-                }
-
-                var key = data.DeviceInfo.ProjectId + "_" + data.DeviceInfo.DeviceId;
-                var obj = ActivePorts[key]
-                console.log(key);
-                console.log(obj);
-                if (obj) {
-                    obj.closeOperation();
-                    delete ActivePorts[key];
-                    updateSerialPortList();
-                }
-                $('#' + key + 'write').remove();
-
-
-                break;
-
-            case SocketCodes.DeviceStatus.DeviceUnidentified:
-                if (data.Message) {
-                    errorNotify(data.Message, "Device Unidentified");
-                } else {
-                    errorNotify("Device can not be identified on " + data.DeviceInfo.PortName + ". Please contact with system admin!", "Device Unidentified");
-                }
-
-                break;
-
-            case SocketCodes.DeviceStatus.Error:
-                if (data.Message) {
-                    errorNotify(data.Message);
-                } else {
-                    errorNotify("An error occured on " + data.DeviceInfo.PortName + "!");
-                }
-
-                break;
-
-            default:
-                errorNotify("Operation Status does not identified!")
-
-        }
-
-
-    }
-
-    function ReplayStatusOperations(data) {
-        switch (data.Status) {
-            case SocketCodes.DeviceStatus.NewDeviceFound:
-                if (data.Message) {
-                    successNotify(data.Message, "New Replay Operation Created!");
-                } else {
-                    successNotify("New Replay Operation Created for " + data.DeviceInfo.PortName + "!", "New Replay Operation Created!");
-                }
-
-                new ReplayData(data.DeviceInfo).Initialize();
-                break;
-
-
-            case SocketCodes.DeviceStatus.Error:
-                if (data.Message) {
-                    errorNotify(data.Message);
-                } else {
-                    errorNotify("An error occured on " + data.DeviceInfo.PortName + " while Replay Operation!");
-                }
-
-                break;
-
-            default:
-                errorNotify("Operation Status does not identified!")
-        }
-    }
-
-
-    var ReadStatus = null;
-
-    function SerialPortReadOperation(data) {
-        var deviceInfo = ActivePorts[data.ProjectId + "_" + data.DeviceId].deviceInfo;
-        switch (data.Status) {
-            case SocketCodes.WROperation.Started:
-                if (data.Message) {
-                    successNotify(data.Message, "Read Operation Started");
-                } else {
-                    successNotify("Read operation is started on " + deviceInfo.PortName + "!", "Read Operation Started");
-                }
-                deviceInfo.StartRead = true;
-                ActivePorts[data.ProjectId + "_" + data.DeviceId].ChangeStartBtnStatus();
-                ActivePorts[data.ProjectId + "_" + data.DeviceId].AddWriteBtn();
-                CreateCharts(deviceInfo);
-                ReadStatus = data;
-                break;
-            case SocketCodes.WROperation.Stopped:
-                if (data.Message) {
-                    warningNotify(data.Message, "Read Operation Stopped");
-                } else {
-                    warningNotify("Read operation is stopped on " + deviceInfo.PortName + "!", "Read Operation Stopped");
-                }
-                deviceInfo.StartRead = false;
-                ActivePorts[data.ProjectId + "_" + data.DeviceId].ChangeStartBtnStatus();
-                ReadStatus = null;
-                break;
-            case SocketCodes.WROperation.Error:
-                if (data.Message) {
-                    errorNotify(data.Message, "Read Operation Error");
-                } else {
-                    errorNotify("An error occured on " + deviceInfo.PortName + "!", "Read Operation Error");
-                }
-                ReadStatus = null;
-                break;
-            default:
-                errorNotify("Operation Status does not identified!", "Read Operation")
-        }
-    }
-
-    function SerialPortWriteOperation(data) {
-        var deviceInfo = ActivePorts[data.ProjectId + "_" + data.DeviceId].deviceInfo;
-        switch (data.Status) {
-            case SocketCodes.WROperation.Started:
-                if (data.Message) {
-                    successNotify(data.Message, "Write Operation Started");
-                } else {
-                    successNotify("Write operation is started on the database!", "Write Operation Started");
-                }
-                deviceInfo.StartWrite = true;
-                ActivePorts[data.ProjectId + "_" + data.DeviceId].ChangeWriteBtnStatus();
-                break;
-            case SocketCodes.WROperation.Stopped:
-                if (data.Message) {
-                    warningNotify(data.Message, "Write Operation Stopped");
-                } else {
-                    warningNotify("Write operation is stopped on the database!", "Write Operation Stopped");
-                }
-                deviceInfo.StartWrite = false;
-                ActivePorts[data.ProjectId + "_" + data.DeviceId].ChangeWriteBtnStatus();
-                break;
-            case SocketCodes.WROperation.Error:
-                if (data.Message) {
-                    errorNotify(data.Message, "Write Operation Error");
-                } else {
-                    errorNotify("An error occured on the database operation!", "Write Operation Error");
-                }
-                break;
-            default:
-                errorNotify("Operation Status does not identified!", "Write Operation")
-        }
-
-    }
-
-    function ReplayOperation(data) {
-        var replayObject = ReplayObjects[data.Id];
-        switch (data.Status) {
-            case SocketCodes.WROperation.Started:
-                if (data.Message) {
-                    successNotify(data.Message, "Replay Operation Started");
-                } else {
-                    successNotify("Replay operation is started!", "Replay Operation Started");
-                }
-                replayObject.Start();
-                break;
-            case SocketCodes.WROperation.Stopped:
-                if (data.Message) {
-                    warningNotify(data.Message, "Replay Operation Stopped");
-                } else {
-                    warningNotify("Replay operation is stopped!", "Replay Operation Stopped");
-                }
-                replayObject.Stop();
-                break;
-            case SocketCodes.WROperation.Paused:
-                if (data.Message) {
-                    warningNotify(data.Message, "Replay Operation Paused");
-                } else {
-                    warningNotify("Replay operation is Paused!", "Replay Operation Paused");
-                }
-                replayObject.Pause();
-                break;
-            case SocketCodes.WROperation.Error:
-                if (data.Message) {
-                    errorNotify(data.Message, "Replay Operation Error");
-                } else {
-                    errorNotify("An error occured on the replay operation!", "Replay Operation Error");
-                }
-                break;
-            default:
-                errorNotify("Operation Status does not identified!", "Replay Operation")
-        }
-
-    }
-
-    function InitialDeviceOperations(data) {
-        for (var i = 0; i < data.ActivePorts.length; i++) {
-            var port = data.ActivePorts[i];
-            var key = port.ProjectId + "_" + port.DeviceId;
-            if (!ActivePorts[key]) {
-                var newdevice = new SerialPort(port);
-                ActivePorts[newdevice.getKey()] = newdevice;
-                if (newdevice.deviceInfo.StartRead) {
-                    newdevice.AddWriteBtn();
-                }
-            }
-        }
-        updateSerialPortList();
-
-        for (var i = 0; i < data.ActiveReplayData.length; i++) {
-            var activeReplayData = data.ActiveReplayData[i];
-            if (!ReplayObjects[activeReplayData.Id]) {
-                new ReplayData(activeReplayData).Initialize();
-            }
-        }
-    }
-
-    function SocketControlMessage(data) {
-        if (data.Operation == SocketCodes.Operations.DeviceStatus) {
-            if (data.DeviceInfo.Id) {
-                ReplayStatusOperations(data);
-            } else {
-                DeviceStatusOperations(data);
-            }
-        } else if (data.Operation == SocketCodes.Operations.ReadOperation) {
-            SerialPortReadOperation(data);
-        } else if (data.Operation == SocketCodes.Operations.WriteOperation) {
-            SerialPortWriteOperation(data);
-        } else if (data.Operation == SocketCodes.Operations.InitialConfigurations) {
-            InitialDeviceOperations(data);
-        } else if (data.Operation == SocketCodes.Operations.ReplayOperation)
-            ReplayOperation(data);
-        else {
-            errorNotify("Operation type does not identified!")
-        }
-    }
-
-
-</script>
 <script>
     $(window).resize(function () {
         var calc_height = $(window).height() - $('#website_footer').height() - $('#page_title').height() - $('#header_container').height()
@@ -953,7 +271,7 @@
         this.SocketId=socketId;
         this.DeviceInfo= deviceInfo;
         this.Initialize = function (){
-            const div = `<li id="${this.SocketId}"><a class="sidebar-sub-toggle"><i class="ti-plug"></i> ${this.DeviceInfo.PublicIP} <span class="sidebar-collapse-icon ti-angle-down"></span></a>
+            const div = `<li id="${this.SocketId}" class="fognode"><a class="sidebar-sub-toggle"><i class="ti-plug"></i> ${this.DeviceInfo.PublicIP} <span class="sidebar-collapse-icon ti-angle-down"></span></a>
                             <ul class="fogdevicelist">
 
                             </ul>
@@ -961,13 +279,13 @@
             if($('.fognode').length>0){
                 $('.fognode').last().after(div);
             }else {
-                $('#foglist').after(div);
+                $('#fognodelabel').after(div);
             }
 
         }
 
         this.AddDevice= function (socketId, deviceInfo, isBroker=false){
-            const div = `<li><a href="ui-typography.html">Typography</a></li>`;
+            const div = `<li><a href="ui-typography.html">Broker: ${deviceInfo.LocalIP}</a></li>`;
             $("#"+this.SocketId+" .fogdevicelist").append(div);
         }
     }
@@ -1061,33 +379,33 @@
     RequestResponseChart.createDataSet(['Reqeust','Response']);
     RequestResponseChart.Initialize();
 
-    // const ctx = document.getElementById('cpu-load');
-    // const labels = [1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10]
-    // const label2 = [5,6,7,8,9,10,1,2,3,4,5,6,7,8,9,10,1,2,3,4,5]
-    // a=new Chart(ctx, {
-    //         type: 'line',
-    //         data: {
-    //             labels: labels,
-    //             datasets: [{
-    //                 label: 'My First Dataset',
-    //                 data: [65, 59, 80, 81, 56, 55, 40,41],
-    //                 fill: false,
-    //                 borderColor: 'rgb(75, 192, 192)',
-    //                 tension: 0.1
-    //             },
-    //                 {
-    //                     label: 'My First Dataset',
-    //                     data: [33, 44, 76, 21, 54, 11, 40,41],
-    //                     fill: false,
-    //                     borderColor: 'rgb(75, 0, 192)',
-    //                     tension: 0.1
-    //                 }
-    //             ]
-    //         }
-    // });
+
 </script>
 <script>
-    rows ="<%=JSON.stringify(FogChildren) %>"
+    FogChildren = <%- JSON.stringify(FogChildren) %>
+    ReloadFogChildren= function () {
+        $('.fognode').remove()
+        if (Object.keys(FogChildren).length > 0) {
+            for (const key in FogChildren) {
+                const fogChild = FogChildren[key];
+                let fogSideBar = new FogSidebar(key, fogChild.DeviceInfo);
+                fogSideBar.Initialize();
+                fogSideBar.AddDevice(key, fogChild.DeviceInfo, true);
+
+                if (fogChild.Children) {
+                    for (const key2 in FogChildren.Children) {
+                        fogSideBar.AddDevice(key2, fogChild.Children[key2].DeviceInfo, false);
+                    }
+                }
+            }
+        } else {
+            const div = `<li class="fognode"><a class="sidebar-sub-toggle"><i class="ti-plug"></i> No connected device found! </a>
+
+                        </li>`;
+            $('#fognodelabel').after(div);
+        }
+    }
+    ReloadFogChildren();
 </script>
 
 <script>
@@ -1149,60 +467,52 @@
         //circleprogress.Change(info.cpu_percentage.total.usage);
     });
     socket.on('bulk_data', function (data) {
-        for (let i = 0; i < data.cores.length; i++) {
-            let circle_progress = new CPUCoreObject('cpu_core_infos', i + 1);
-            circle_progress.initialize()
-            circle_progress.Change(data.cores[i] / 100);
-            Core_CircleBars.push(circle_progress);
+        if(Core_CircleBars.length ==0) {
+            for (let i = 0; i < data.cores.length; i++) {
+                let circle_progress = new CPUCoreObject('cpu_core_infos', i + 1);
+                circle_progress.initialize()
+                circle_progress.Change(data.cores[i] / 100);
+                Core_CircleBars.push(circle_progress);
+            }
         }
         CPULoad.AddBulkData([data.cpu])
         RequestResponseChart.AddBulkData([data.request, data.response]);
     })
 
-    socket.on('news', function (data) {
-        console.log(data);
-        socket.emit('my other event', {my: 'data'});
+    socket.on('device_info', function (obj) {
+        console.log(obj)
+        FogChildren[obj.SocketId] = {DeviceInfo: obj.DeviceInfo}
+        ReloadFogChildren()
     });
 
-    function Squat() {
-        $('#motion_name').html("Squat");
-        $('#motion_image').attr("src", "./images/squat.png")
-    }
-
-    function Walking() {
-        $('#motion_name').html("Walking");
-        $('#motion_image').attr("src", "./images/walking.png")
-    }
-
-
-    function Running() {
-        $('#motion_name').html("Running");
-        $('#motion_image').attr("src", "./images/running.png")
-    }
-
-    socket.on("decision", function (data) {
-        if (data == "squat") {
-            Squat();
+    socket.on('device_disconnected', function (obj){
+        if(FogChildren[obj.ParentId]){
+            delete FogChildren[obj.ParentId];
         }
-
-        if (data == "walking") {
-            Walking();
-        }
-
-        if (data == "running") {
-            Running();
-        }
+        ReloadFogChildren();
     });
 
-    socket.on("control", function (data) {
-        console.log(data);
+    socket.on('worker_disconnected', function (obj){
+        const child = FogChildren[obj.ParentId]
+        if(child.Children){
+            if(child.Children[obj.SocketId]){
+                delete child.Children[obj.SocketId]
+            }
+        }
+        ReloadFogChildren();
+    });
 
-        SocketControlMessage(data);
-    })
+    socket.on('worker_device_info', function (obj) {
+        const child = FogChildren[obj.ParentId]
+        if(child.Children){
+            child.Children={}
+        }
+        child.Children[obj.SocketId] ={DeviceInfo : obj.DeviceInfo}
+        ReloadFogChildren()
+    });
 
-    function sendMessage(message) {
-        socket.emit("decision", message);
-    }
+
+
 
 
 </script>

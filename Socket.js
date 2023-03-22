@@ -119,7 +119,7 @@ module.exports=function (FogEtex) {
 
 
         }
-        if(socket.devicetype==Config.DeviceTypes.User){
+        if(socket.DeviceType==Config.DeviceTypes.User){
             socket.on("disconnect", (reason) => {
                 console.log("User disconnected " + reason)
                 if (socket == process_master) {
@@ -206,7 +206,7 @@ module.exports=function (FogEtex) {
             });
         }
 
-        if(socket.devicetype==Config.DeviceTypes.UserInterface){
+        if(socket.DeviceType==Config.DeviceTypes.UserInterface){
             socket.Directory = socket.handshake.query.Directory;
             socket.join('ui');
             if(!io.ui_clients[socket.Directory]){
