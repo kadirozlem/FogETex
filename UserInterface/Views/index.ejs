@@ -413,7 +413,7 @@
                 fogSideBar.AddDevice(key, fogChild.DeviceInfo, true);
 
                 if (fogChild.Children) {
-                    for (const key2 in FogChildren.Children) {
+                    for (const key2 in fogChild.Children) {
                         fogSideBar.AddDevice(key2, fogChild.Children[key2].DeviceInfo, false);
                     }
                 }
