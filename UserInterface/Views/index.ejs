@@ -286,7 +286,7 @@
         }
 
         this.AddDevice= function (socketId, deviceInfo, isBroker=false){
-            const div = `<li><a href="ui-typography.html">Broker: ${deviceInfo.LocalIP}</a></li>`;
+            const div = `<li><a href="ui-typography.html">${isBroker?"Broker":"Worker"}: ${deviceInfo.LocalIP}</a></li>`;
             $("#"+this.SocketId+" .fogdevicelist").append(div);
         }
     }
