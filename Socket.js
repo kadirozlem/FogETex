@@ -90,6 +90,7 @@ module.exports=function (FogEtex) {
             });
 
             socket.on('worker_resource_info', (socket_id, resource_info)=>{
+                if(!io.fog_children[socket.id].Children[socket_id]) return;
                 const arr=io.fog_children[socket.id].Children[socket_id].ResourceInfos;
                 arr.push(resource_info);
                 if (arr.length > Config.RM_BufferSize){
