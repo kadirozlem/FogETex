@@ -82,6 +82,7 @@ module.exports = {
     DeviceTypeString: DeviceTypes.GetDeviceName(Config.DeviceType),
     PublicIP: publicIP,
     LocalIP: localIP,
+    Port: Config.Port,
     Country: country_info.country,
     Continent: country_info.continent,
     Region: geo.region,

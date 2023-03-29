@@ -296,7 +296,7 @@
             this.SocketId=socketId;
             this.DeviceInfo= deviceInfo;
             this.Initialize = function (){
-                const div = `<li id="${this.SocketId}" class="fognode"><a class="sidebar-sub-toggle"><i class="ti-plug"></i> ${this.DeviceInfo.LocalIP}</a>
+                const div = `<li id="${this.SocketId}" class="fognode"><a  href="http://${this.DeviceInfo.LocalIP}:${this.DeviceInfo.Port}" target="_blank"><i class="ti-plug"></i> ${this.DeviceInfo.LocalIP}</a>
 
                             </li>`;
                 if($('.fognode').length>0){
@@ -410,6 +410,7 @@
                 const fogChild = FogChildren[key];
                 let fogSideBar = new FogSidebar(key, fogChild.DeviceInfo);
                 fogSideBar.Initialize();
+                <%  if(DeviceInfo.DeviceType != DeviceTypes.Broker){ %>
                 fogSideBar.AddDevice(key, fogChild.DeviceInfo, true);
 
                 if (fogChild.Children) {
@@ -417,6 +418,7 @@
                         fogSideBar.AddDevice(key2, fogChild.Children[key2].DeviceInfo, false);
                     }
                 }
+                <% }%>
             }
         } else {
             const div = `<li class="fognode"><a class="sidebar-sub-toggle"><i class="ti-plug"></i> No connected device found! </a>
@@ -498,17 +500,20 @@
         }
         CPULoad.AddBulkData([data.cpu])
         RequestResponseChart.AddBulkData([data.request, data.response]);
-    })
+    });
 
     socket.on('device_info', function (obj) {
         console.log(obj)
+        connected_device= obj;
         FogChildren[obj.SocketId] = {DeviceInfo: obj.DeviceInfo}
         ReloadFogChildren()
     });
 
     socket.on('device_disconnected', function (obj){
-        if(FogChildren[obj.ParentId]){
-            delete FogChildren[obj.ParentId];
+        console.log("hgasd")
+        disconnected_device = obj
+        if(FogChildren[obj.SocketId]){
+            delete FogChildren[obj.SocketId];
         }
         ReloadFogChildren();
     });

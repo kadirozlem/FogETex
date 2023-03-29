@@ -38,7 +38,7 @@ module.exports=function (FogEtex) {
 
             socket.on('device_info', (device_info)=>{
                 io.fog_children[socket.id].DeviceInfo = device_info;
-                io.to('iu').emit('device_info', {SocketId : socket.id, DeviceInfo:device_info} );
+                io.SendAllUserInterface('device_info', {SocketId : socket.id, DeviceInfo:device_info} );
                 FogEtex.ResourceManager.Socket.emit('worker_device_info', socket.id, device_info, []);
             });
 
@@ -56,7 +56,7 @@ module.exports=function (FogEtex) {
 
             socket.on('disconnect',(reason) =>{
                 FogEtex.ResourceManager.Socket.emit('worker_disconnected', socket.id, reason);
-                io.to('iu').emit('device_disconnected',{SocketId:socket.id, Reason:reason});
+                io.SendAllUserInterface('device_disconnected',{SocketId:socket.id, Reason:reason});
                 const key = socket.id;
                 if(io.fog_children[key]){
                     delete io.fog_children[key];
@@ -69,7 +69,7 @@ module.exports=function (FogEtex) {
 
             socket.on('device_info', (device_info)=>{
                 io.fog_children[socket.id].DeviceInfo = device_info;
-                io.to('iu').emit('device_info', {SocketId : socket.id, DeviceInfo:device_info} );
+                io.SendAllUserInterface('device_info', {SocketId : socket.id, DeviceInfo:'device_info'} );
             });
 
             socket.on('resource_info', (resource_info)=>{
@@ -86,11 +86,11 @@ module.exports=function (FogEtex) {
 
             socket.on('worker_device_info', (socket_id,device_info, resource_info)=>{
                 io.fog_children[socket.id].Children[socket_id]={DeviceInfo : device_info, ResourceInfos:resource_info}
-                io.to('iu').emit('device_info', {SocketId:socket_id, ParentId: socket.id, DeviceInfo:device_info} );
+                io.SendAllUserInterface('device_info', {SocketId:socket_id, ParentId: socket.id, DeviceInfo:device_info} );
             });
 
             socket.on('worker_resource_info', (socket_id, resource_info)=>{
-                if(!io.fog_children[socket.id].Children[socket_id]) return;
+                if(!io.fog_children[socket.id].Children[socket_id]) {console.log("Worker cannot found in resource info"); return;}
                 const arr=io.fog_children[socket.id].Children[socket_id].ResourceInfos;
                 arr.push(resource_info);
                 if (arr.length > Config.RM_BufferSize){
@@ -103,15 +103,16 @@ module.exports=function (FogEtex) {
             });
 
             socket.on('worker_disconnected', (socket_id, reason)=>{
-                io.to('iu').emit('device_disconnected',{SocketId:socket_id, ParentId: socket.id,Reason:reason});
-                const key = socket.id + "_" + socket_id;
-                if(io.fog_children[key]){
-                    delete io.fog_children[key];
+                io.SendAllUserInterface('device_disconnected',{SocketId:socket_id, ParentId: socket.id,Reason:reason});
+                if(io.fog_children[socket.id]){
+                    if(io.fog_children[socket.id].Children[socket_id]) {
+                        delete io.fog_children[socket.id].Children[socket_id];
+                    }
                 }
             });
 
             socket.on('disconnect',(reason) =>{
-                io.to('iu').emit('device_disconnected',{SocketId:socket.id, Reason:reason});
+                io.SendAllUserInterface('device_disconnected',{SocketId:socket.id, Reason:reason});
                 const key = socket.id;
                 if(io.fog_children[key]){
                     delete io.fog_children[key];
@@ -233,6 +234,12 @@ module.exports=function (FogEtex) {
             });
         }
     });
+
+    io.SendAllUserInterface=function (eventName, message){
+        for(const directory in io.ui_clients){
+            io.ui_clients[directory].forEach(element => element.emit(eventName,message))
+        }
+    }
 
     io.SendResourceInfo = function (info) {
         io.resource_members.forEach(element => element.emit("resource_info", info));
