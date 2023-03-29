@@ -504,14 +504,12 @@
 
     socket.on('device_info', function (obj) {
         console.log(obj)
-        connected_device= obj;
         FogChildren[obj.SocketId] = {DeviceInfo: obj.DeviceInfo}
         ReloadFogChildren()
     });
 
     socket.on('device_disconnected', function (obj){
         console.log("hgasd")
-        disconnected_device = obj
         if(FogChildren[obj.SocketId]){
             delete FogChildren[obj.SocketId];
         }
@@ -520,7 +518,7 @@
 
     socket.on('worker_disconnected', function (obj){
         const child = FogChildren[obj.ParentId]
-        if(child.Children){
+        if(child){
             if(child.Children[obj.SocketId]){
                 delete child.Children[obj.SocketId]
             }
@@ -530,7 +528,7 @@
 
     socket.on('worker_device_info', function (obj) {
         const child = FogChildren[obj.ParentId]
-        if(child.Children){
+        if(!child.Children){
             child.Children={}
         }
         child.Children[obj.SocketId] ={DeviceInfo : obj.DeviceInfo}

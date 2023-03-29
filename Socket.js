@@ -86,7 +86,7 @@ module.exports=function (FogEtex) {
 
             socket.on('worker_device_info', (socket_id,device_info, resource_info)=>{
                 io.fog_children[socket.id].Children[socket_id]={DeviceInfo : device_info, ResourceInfos:resource_info}
-                io.SendAllUserInterface('device_info', {SocketId:socket_id, ParentId: socket.id, DeviceInfo:device_info} );
+                io.SendAllUserInterface('worker_device_info', {SocketId:socket_id, ParentId: socket.id, DeviceInfo:device_info} );
             });
 
             socket.on('worker_resource_info', (socket_id, resource_info)=>{
@@ -103,7 +103,7 @@ module.exports=function (FogEtex) {
             });
 
             socket.on('worker_disconnected', (socket_id, reason)=>{
-                io.SendAllUserInterface('device_disconnected',{SocketId:socket_id, ParentId: socket.id,Reason:reason});
+                io.SendAllUserInterface('worker_disconnected',{SocketId:socket_id, ParentId: socket.id,Reason:reason});
                 if(io.fog_children[socket.id]){
                     if(io.fog_children[socket.id].Children[socket_id]) {
                         delete io.fog_children[socket.id].Children[socket_id];
