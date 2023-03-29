@@ -69,7 +69,7 @@ module.exports=function (FogEtex) {
 
             socket.on('device_info', (device_info)=>{
                 io.fog_children[socket.id].DeviceInfo = device_info;
-                io.SendAllUserInterface('device_info', {SocketId : socket.id, DeviceInfo:'device_info'} );
+                io.SendAllUserInterface('device_info', {SocketId : socket.id, DeviceInfo:device_info} );
             });
 
             socket.on('resource_info', (resource_info)=>{
@@ -210,6 +210,7 @@ module.exports=function (FogEtex) {
 
         if(socket.DeviceType==Config.DeviceTypes.UserInterface){
             socket.Directory = socket.handshake.query.Directory;
+            socket.join('ui');
             socket.join('ui');
             if(!io.ui_clients[socket.Directory]){
                 io.ui_clients[socket.Directory]=[]
