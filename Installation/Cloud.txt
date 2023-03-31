@@ -50,6 +50,10 @@ forever start Server.js
 #Change Directory
 cd GaitAnalysis
 
+#install Pip if it does not exist
+sudo apt-get install python3-pip
+
+
 #Install Package for Python
-pip3 install -r requirement.txt
+pip3 install -r requirements.txt
 

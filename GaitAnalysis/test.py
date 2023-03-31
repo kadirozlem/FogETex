@@ -7,7 +7,7 @@ class Test:
     def __init__(self, name):
         print("Test started for "+name+".")
     @staticmethod
-    def ClearModel(self):
+    def ClearModel():
         start = timer()
         GaitAnalysis.ClearModelData()
         end = timer()
