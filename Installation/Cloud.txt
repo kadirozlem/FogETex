@@ -27,7 +27,7 @@ git clone https://kadirozlem:github_pat_11AB5HBWI08UuvcQp4woUu_QXBS7RSFmtKMDeY16
 cd FogETex/
 
 #Add Project Url To Update
-git remote set-url origin https://kadirozlem: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@github.com/kadirozlem/FogETex.git
+git remote set-url origin https://kadirozlem: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@github.com/kadirozlem/FogETex.git
 
 #Set git pull method as Fast Forward Only to eliminate warnings
 git config pull.ff only
@@ -46,3 +46,10 @@ npm install forever-monitor
 
 #Run Application
 forever start Server.js
+
+#Change Directory
+cd GaitAnalysis
+
+#Install Package for Python
+pip3 install -r requirement.txt
+
