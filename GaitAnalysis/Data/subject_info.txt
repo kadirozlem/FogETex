@@ -1,0 +1,5 @@
+1: 21 M 170 cm 65 kg # DONE
+2: 35 F 160 cm 62 kg # DONE
+3: 32 M 165 cm 72 kg # DONE
+4: 22 F 172 cm 63 kg # TODO
+5: 21 M 183 cm 75 kg # TODO
