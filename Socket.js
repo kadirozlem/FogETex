@@ -10,59 +10,22 @@ module.exports=function (FogEtex) {
     io.ui_clients = {'Home':[]}
     io.fog_children={}
     io.process_master = null;
-    io.resource_members = []
     io.users_package = {}
     io.users_package_buffer={}
 
     io.GetCandidateUserId= function (){
         let i = 1;
-        while (io.users[i]) {
-            i++
+
+        while (io.users[i.toString()]) {
+            i++;
         }
-        io.users[i] = true;
-        return i;
+        io.users[i.toString()] = true;
+        return i.toString();
     }
 
     io.on("connection", (socket) => {
         socket.DeviceType= parseInt(socket.handshake.query.DeviceType || Config.DeviceTypes.User);
-        //If client is User, get small id to decrease communication message
-        if(socket.DeviceType == Config.DeviceTypes.User){
-            socket.userId = io.GetCandidateUserId();
-            socket.FileName =  Helper.DateTimeAsFilename()+'_'+socket.id;
-            socket.emit('filename', socket.FileName);
-        }
         console.log(Config.DeviceTypes.GetDeviceName(socket.DeviceType)+" connected");
-
-        if(socket.DeviceType==Config.DeviceTypes.Worker){
-            io.fog_children[socket.id] = { DeviceInfo: null, ResourceInfos:[]}
-
-            socket.on('device_info', (device_info)=>{
-                io.fog_children[socket.id].DeviceInfo = device_info;
-                io.SendAllUserInterface('device_info', {SocketId : socket.id, DeviceInfo:device_info} );
-                FogEtex.ResourceManager.Socket.emit('worker_device_info', socket.id, device_info, []);
-            });
-
-            socket.on('resource_info', (resource_info)=>{
-                const arr=io.fog_children[socket.id].ResourceInfos;
-                arr.push(resource_info);
-                if (arr.length > Config.RM_BufferSize){
-                    arr.shift()
-                }
-                if(io.ui_clients[socket.id]){
-                    io.ui_clients[socket.id].forEach(x => x.emit('resource_info', resource_info));
-                }
-                FogEtex.ResourceManager.Socket.emit('worker_resource_info', socket.id, resource_info);
-            });
-
-            socket.on('disconnect',(reason) =>{
-                FogEtex.ResourceManager.Socket.emit('worker_disconnected', socket.id, reason);
-                io.SendAllUserInterface('device_disconnected',{SocketId:socket.id, Reason:reason});
-                const key = socket.id;
-                if(io.fog_children[key]){
-                    delete io.fog_children[key];
-                }
-            });
-        }
 
         if(socket.DeviceType==Config.DeviceTypes.Broker){
             io.fog_children[socket.id] = { DeviceInfo: null, ResourceInfos:[], Children:{}}
@@ -121,91 +84,124 @@ module.exports=function (FogEtex) {
 
 
         }
-        if(socket.DeviceType==Config.DeviceTypes.User){
+
+        if(socket.DeviceType==Config.DeviceTypes.Worker){
+            io.fog_children[socket.id] = { DeviceInfo: null, ResourceInfos:[]}
+
+            socket.on('device_info', (device_info)=>{
+                io.fog_children[socket.id].DeviceInfo = device_info;
+                io.SendAllUserInterface('device_info', {SocketId : socket.id, DeviceInfo:device_info} );
+                FogEtex.ResourceManager.Socket.emit('worker_device_info', socket.id, device_info, []);
+            });
+
+            socket.on('resource_info', (resource_info)=>{
+                const arr=io.fog_children[socket.id].ResourceInfos;
+                arr.push(resource_info);
+                if (arr.length > Config.RM_BufferSize){
+                    arr.shift()
+                }
+                if(io.ui_clients[socket.id]){
+                    io.ui_clients[socket.id].forEach(x => x.emit('resource_info', resource_info));
+                }
+                FogEtex.ResourceManager.Socket.emit('worker_resource_info', socket.id, resource_info);
+            });
+
+            socket.on('disconnect',(reason) =>{
+                FogEtex.ResourceManager.Socket.emit('worker_disconnected', socket.id, reason);
+                io.SendAllUserInterface('device_disconnected',{SocketId:socket.id, Reason:reason});
+                const key = socket.id;
+                if(io.fog_children[key]){
+                    delete io.fog_children[key];
+                }
+            });
+        }
+
+        if(socket.DeviceType == Config.DeviceTypes.ProcessMaster){
+            process_master = socket;
+
             socket.on("disconnect", (reason) => {
-                console.log("User disconnected " + reason)
-                if (socket == process_master) {
-                    process_master = null;
+                console.log("Process master disconnected " + reason);
+                for(var key in io.users ){
+                    io.users[key].emit("application_disconnected", true);
                 }
-                if (io.users[socket.id]) {
-                    if (io.users[socket.id].process) {
-                        io.users[socket.id].process.emit("user_disconnected", socket.id)
-                    }
-                    delete io.users[socket.id]
-                } else {
-                    for (var key in io.users) {
-                        if (io.users[key].process == socket) {
-                            io.users[key].user.emit("application_disconnected", true);
-                            delete io.users[key]
-                        }
-                    }
-                }
-
-                var resource_index = io.resource_members.indexOf(socket);
-                if (resource_index !== -1) {
-                    io.resource_members.splice(resource_index, 1);
-                    console.log(socket.id + " element removed from resource_members")
-
-                }
-
+                process_master = null;
             });
 
-            socket.on("sensor_data", (obj) => {
-                obj.time_info["socket_received"] = microtime.nowDouble();
-                io.users[socket.id].process.emit("sensor_data", socket.id, obj.data, obj.time_info);
-                if (!io.users_package[socket.id]) {
-                    io.users_package[socket.id] = {index: socket.user_index, request: 1, response: 0}
-                } else {
-                    io.users_package[socket.id].request++;
-                }
-            });
-
-            socket.on("master_info", (status) => {
-                if (status) {
-                    process_master = socket;
-                }
-            });
-
-            socket.on("app_info", (obj) => {
-                io.users[socket.id] = {index: obj.index, user: socket, process: null}
-                socket.user_index = obj.index
-                if (process_master) {
-                    process_master.emit("new_user", socket.id, obj.application);
-                } else {
-                    socket.emit("process_ready", false, "Master is not ready");
-                }
-            });
-            socket.on("process_ready", (obj) => {
-                if (!io.users[obj.username]) {
-                    console.log('User not found: ' + obj.username)
+            //msg -> userid;status -> 12;1
+            socket.on("process_ready", (msg) => {
+                const [userId, status] =msg.split(";");
+                if (!io.users[userId]) {
+                    console.log('User not found: ' + userId)
                     return
                 }
 
-                io.users[obj.username].user.emit("process_ready", obj.status, obj.info)
-                if (!obj.status) {
-                    delete io.users[obj.username]
-                } else {
-                    io.users[obj.username].process = socket
-                }
+                io.users[userId].user.emit("process_ready", status)
             });
-
-            socket.on("result", (obj) => {
+            //req: msg -> 'userId|socket_received|data_index;result;added_queue;process_started;process_finished'
+            //response -> 'data_index;result;added_queue;process_started;process_finished;response_time'
+            socket.on("result", (msg) => {
                 if (!io.users[obj.username]) {
                     //console.log(obj.username+'User not found!')
                     return
                 }
-                obj.time_info["result_received_socket"] = microtime.nowDouble();
-                io.users[obj.username].user.emit("result", obj.result, obj.time_info);
-                if (!io.users_package[obj.username]) {
-                    io.users_package[obj.username] = {index: socket.user_index, request: 0, response: 1}
+                result_received_socket = microtime.nowDouble();
+                const [userId, socket_received, result]=msg.split("|");
+                response_time = result_received_socket - parseFloat(socket_received);
+                response = result+";"+response_time;
+
+
+                io.users[userId].emit("result", response);
+
+                if (!io.users_package[userId]) {
+                    io.users_package[userId] = {index: socket.user_index, request: 0, response: 1}
                 } else {
-                    io.users_package[obj.username].response++;
+                    io.users_package[userId].response++;
                 }
             });
 
-            socket.on("register_resource", (obj) => {
-                io.resource_members.push(socket)
+        }
+
+        if(socket.DeviceType==Config.DeviceTypes.User){
+            //If client is User, get small id to decrease communication message
+            socket.userId = io.GetCandidateUserId();
+            socket.FileName =  Helper.DateTimeAsFilename()+'_'+socket.id;
+            socket.emit('filename', socket.FileName);
+
+            socket.on("disconnect", (reason) => {
+                console.log("User disconnected " + reason)
+
+                if (io.users[socket.id]) {
+                    if (io.process_master) {
+                        io.process_master.emit("user_disconnected", socket.id)
+                    }
+                    delete io.users[socket.id]
+                }
             });
+            //msg -> dataIndex|data -> 1|123;1
+            socket.on("sensor_data", (msg) => {
+                const socket_received = microtime.nowDouble();
+                const message = `${socket.userId}|${msg}|${socket_received}`;
+                io.process_master.emit("sensor_data", message);
+                if (!io.users_package[socket.userId]) {
+                    io.users_package[socket.userId] = {index: socket.user_index, request: 1, response: 0}
+                } else {
+                    io.users_package[socket.userId].request++;
+                }
+            });
+
+            //user_index -> 1  #Created by user
+            socket.on("app_info", (user_index) => {
+                io.users[socket.userId] = socket;
+                socket.user_index = user_index;
+                if (io.process_master) {
+                    io.process_master.emit("new_user", socket.userId);
+                } else {
+                    socket.emit("process_ready", "false|Master is not ready");
+                }
+            });
+
+
+
         }
 
         if(socket.DeviceType==Config.DeviceTypes.UserInterface){
@@ -240,9 +236,5 @@ module.exports=function (FogEtex) {
         for(const directory in io.ui_clients){
             io.ui_clients[directory].forEach(element => element.emit(eventName,message))
         }
-    }
-
-    io.SendResourceInfo = function (info) {
-        io.resource_members.forEach(element => element.emit("resource_info", info));
     }
 }

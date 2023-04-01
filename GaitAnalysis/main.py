@@ -2,6 +2,8 @@ import logging
 import time
 import datetime
 import socketio
+
+import gait_analysis
 from gait_analysis import GaitAnalysis
 from collections import deque
 from config import Configuration
@@ -90,6 +92,7 @@ class SingleThreadProcess:
             time.sleep(0.001)
 
 if __name__ == '__main__':
+    gait_analysis.Config.Print=True
     GaitAnalysis.Initiate()
     SingleThreadProcess().process()
 
