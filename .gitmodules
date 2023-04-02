@@ -1,0 +1,3 @@
+[submodule "LoadTest/FogETexResourceManager"]
+	path = LoadTest/FogETexResourceManager
+	url = https://github.com/kadirozlem/FogETexResourceManager
