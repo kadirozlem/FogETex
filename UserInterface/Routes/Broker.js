@@ -6,6 +6,9 @@ router.get('/', function (req, res, next){
    res.send("Broker Device");
 });
 
+router.get('/AssignWorkerDevice', function (req, res, next){
+
+});
 
 
 

@@ -20,7 +20,8 @@ router.get('/AssignFogNode',(req, res, next)=>{
 
    const brokers = req.app.FogETex.Socket.fog_children;
    for (const key in brokers){
-      if(brokers[key].DeviceInfo.PublicIP == user_ip){
+      const broker = brokers[key];
+      if(broker.DeviceInfo.PublicIP == user_ip && !broker.NodeBusy){
          res.json({IP: brokers[key].DeviceInfo.LocalIP,type:'LAN',distance:0, err: null });
          return;
       }
@@ -31,7 +32,7 @@ router.get('/AssignFogNode',(req, res, next)=>{
       const broker= brokers[key];
       const distance = Helper.CalculateDistance(user_lat,user_lon,...broker.DeviceInfo.Location);
 
-      if(!closest_node || closest_node.distance > distance){
+      if((!closest_node || closest_node.distance > distance)&& !broker.NodeBusy){
          closest_node = {IP:broker.DeviceInfo.PublicIP, type: 'WAN', distance:distance, err: null };
       }
    }

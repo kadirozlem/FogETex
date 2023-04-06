@@ -28,7 +28,7 @@ module.exports=function (FogEtex) {
         console.log(Config.DeviceTypes.GetDeviceName(socket.DeviceType)+" connected");
 
         if(socket.DeviceType==Config.DeviceTypes.Broker){
-            io.fog_children[socket.id] = { DeviceInfo: null, ResourceInfos:[], Children:{}}
+            io.fog_children[socket.id] = { DeviceInfo: null, FogBusy: true, ResourceInfos:[], Children:{}}
 
             socket.on('device_info', (device_info)=>{
                 io.fog_children[socket.id].DeviceInfo = device_info;
@@ -36,6 +36,7 @@ module.exports=function (FogEtex) {
             });
 
             socket.on('resource_info', (resource_info)=>{
+                io.fog_children[socket.id].NodeBusy = resource_info.NodeBusy;
                 const arr=io.fog_children[socket.id].ResourceInfos;
                 arr.push(resource_info);
                 if (arr.length > Config.RM_BufferSize){
@@ -86,7 +87,7 @@ module.exports=function (FogEtex) {
         }
 
         if(socket.DeviceType==Config.DeviceTypes.Worker){
-            io.fog_children[socket.id] = { DeviceInfo: null, ResourceInfos:[]}
+            io.fog_children[socket.id] = { DeviceInfo: null, Busy:true, ResourceInfos:[]}
 
             socket.on('device_info', (device_info)=>{
                 io.fog_children[socket.id].DeviceInfo = device_info;
@@ -95,6 +96,9 @@ module.exports=function (FogEtex) {
             });
 
             socket.on('resource_info', (resource_info)=>{
+                const cpu_usage = resource_info.cpu_percentage.total.usage;
+                const memory_usage = 100*(resource_info.totalmem - resource_info.freemem) / resource_info.totalmem;
+                io.fog_children[socket.id].Busy = cpu_usage>Config.WorkerCPULimit || memory_usage> Config.WorkerMemoryLimit;
                 const arr=io.fog_children[socket.id].ResourceInfos;
                 arr.push(resource_info);
                 if (arr.length > Config.RM_BufferSize){

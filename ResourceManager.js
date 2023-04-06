@@ -178,14 +178,9 @@ class Resources {
             resourceInfo.NodeBusy=true;
             for(const key in children){
                 const child = children[key]
-                if(child.ResourceInfos.length){
-                    const last_resource = child.ResourceInfos[child.ResourceInfos.length - 1]
-                    const cpu_usage = last_resource.cpu_percentage.total.usage;
-                    const memory_usage = 100*(last_resource.totalmem - last_resource.freemem) / last_resource.totalmem;
-                    if(cpu_usage<Config.WorkerCPULimit && memory_usage< Config.WorkerMemoryLimit ){
-                        resourceInfo.NodeBusy=false;
-                        break;
-                    }
+                if(!child.Busy){
+                      resourceInfo.NodeBusy=false;
+                      break;
                 }
             }
 
