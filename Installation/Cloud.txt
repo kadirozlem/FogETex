@@ -21,16 +21,19 @@ sudo apt install git
 git --version
 
 #Pull Project From Git Repository
-git clone https://kadirozlem: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@github.com/kadirozlem/FogETex.git
+git clone --recursive https://kadirozlem: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@github.com/kadirozlem/FogETex.git
 
 #Change Directory
 cd FogETex/
 
 #Add Project Url To Update
-git remote set-url origin https://kadirozlem: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@github.com/kadirozlem/FogETex.git
+git remote set-url origin https://kadirozlem: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@github.com/kadirozlem/FogETex.git
 
 #Set git pull method as Fast Forward Only to eliminate warnings
 git config pull.ff only
+
+#Git Add Submodule Creditential
+git config submodule.LoadTest/FogETexResourceManager.url https://kadirozlem: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@github.com/kadirozlem/FogETexResourceManager.git
 
 #Install All Modules For Project
 npm install
