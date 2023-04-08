@@ -1,7 +1,7 @@
 git stash
 git reset -- hard
 git clean -fd
-git pull
+git pull --recurse-submodules
 npm install
 cd ./
 node ./Config/CacheDeviceType.js
