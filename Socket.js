@@ -121,7 +121,7 @@ module.exports=function (FogEtex) {
         }
 
         if(socket.DeviceType == Config.DeviceTypes.ProcessMaster){
-            process_master = socket;
+            io.process_master = socket;
 
             socket.on("disconnect", (reason) => {
                 console.log("Process master disconnected " + reason);
@@ -131,25 +131,26 @@ module.exports=function (FogEtex) {
                 process_master = null;
             });
 
-            //msg -> userid;status -> 12;1
+            //msg -> userid;status -> 12|1  or 12|1;AppNotCreate
             socket.on("process_ready", (msg) => {
-                const [userId, status] =msg.split(";");
+                const [userId, status_msg] =msg.split("|");
                 if (!io.users[userId]) {
                     console.log('User not found: ' + userId)
                     return
                 }
 
-                io.users[userId].user.emit("process_ready", status)
+                io.users[userId].emit("process_ready", status_msg)
             });
             //req: msg -> 'userId|socket_received|data_index;result;added_queue;process_started;process_finished'
             //response -> 'data_index;result;added_queue;process_started;process_finished;response_time'
             socket.on("result", (msg) => {
-                if (!io.users[obj.username]) {
+                result_received_socket = microtime.nowDouble();
+                const [userId, socket_received, result]=msg.split("|");
+                if (!io.users[userId]) {
                     //console.log(obj.username+'User not found!')
                     return
                 }
-                result_received_socket = microtime.nowDouble();
-                const [userId, socket_received, result]=msg.split("|");
+
                 response_time = result_received_socket - parseFloat(socket_received);
                 response = result+";"+response_time;
 
@@ -174,11 +175,11 @@ module.exports=function (FogEtex) {
             socket.on("disconnect", (reason) => {
                 console.log("User disconnected " + reason)
 
-                if (io.users[socket.id]) {
+                if (io.users[socket.userId]) {
                     if (io.process_master) {
                         io.process_master.emit("user_disconnected", socket.id)
                     }
-                    delete io.users[socket.id]
+                    delete io.users[socket.userId]
                 }
             });
             //msg -> dataIndex|data -> 1|123;1
@@ -194,13 +195,14 @@ module.exports=function (FogEtex) {
             });
 
             //user_index -> 1  #Created by user
+            //response -> false|msg   or true
             socket.on("app_info", (user_index) => {
                 io.users[socket.userId] = socket;
                 socket.user_index = user_index;
                 if (io.process_master) {
-                    io.process_master.emit("new_user", socket.userId);
+                    io.process_master.emit("new_user", socket.userId+"|"+socket.id);
                 } else {
-                    socket.emit("process_ready", "false|Master is not ready");
+                    socket.emit("process_ready", "0;Master is not ready");
                 }
             });
 

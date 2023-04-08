@@ -27,5 +27,5 @@ class Configuration:
     ApplicationTestType = TestType.Worker
     Servers = {
 
-        'http://192.168.1.100': {'worker_port': 27592, 'resource_port': 17796, 'thread_count': 1}
+        'http://localhost': {'worker_port': '27592', 'resource_port': '17796', 'thread_count': 1}
     }

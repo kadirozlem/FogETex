@@ -48,13 +48,17 @@ class SingleThreadProcess:
             logger.info("Worker connected")
 
         @sio.on("new_user")
-        def new_user(userid):
+        def new_user(message):
+            userid, socketid = message.split("|")
             try:
                 self.users[userid] = GaitAnalysis()
-                sio.emit("process_ready", f"{userid};1")
+                sio.emit("process_ready", f"{userid}|1")
+                logger.info(f"A user connected: UserId: {socketid}")
             except:
-                sio.emit("process_ready", f"{userid};0;AppNotCreate")
-                logger.info(f"A user connected: UserId: {userid}")
+                sio.emit("process_ready", f"{userid}|0;AppNotCreate")
+                logger.info(f"A user connected: UserId: {socketid}")
+
+
 
         @sio.on("user_disconnected")
         def user_disconnected(userid):

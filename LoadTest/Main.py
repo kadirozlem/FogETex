@@ -47,11 +47,13 @@ class SetInterval():
 
 
 class ResultWriter:
+    Obj=None
     ThreadTimeInfo = {}
     ThreadInformations = {}
     ResourceInfo = {}
 
     def __init__(self):
+        ResultWriter.Obj=self
         self.directory = Config.Configuration.FileDirectory + datetime.datetime.today().strftime(
             '%Y_%m_%d___%H_%M_%S') + Config.Configuration.FilePostfix + "/"
         os.makedirs(self.directory, exist_ok=True)
@@ -91,7 +93,7 @@ class ResultWriter:
 
     @staticmethod
     def AddThreadTimeInformation(thread_no, record):
-        timeInfo = ResultWriter.ThreadInformations.get(thread_no)
+        timeInfo = ResultWriter.ThreadTimeInfo.get(thread_no)
         if timeInfo is None:
             ResultWriter.ThreadTimeInfo[thread_no] = [record + "\n"]
         else:
@@ -103,7 +105,7 @@ class ResultWriter:
         if resourceInfo is None:
             ResultWriter.ResourceInfo[url] = [json.dumps(info) + "\n"]
         else:
-            resourceInfo[url].append(json.dumps(info) + "\n")
+            resourceInfo.append(json.dumps(info) + "\n")
 
     @staticmethod
     def AddThreadInformation(thread_no, record):
@@ -150,16 +152,16 @@ class FogTester(Thread):
         pass
 
     def run(self):
+        self.StartResourceThread()
         ResultWriter.AddThreadInformation(self.i, "ThreadStarted;" + str(now()))
         if self.TestType == Config.TestType.System:
             self.FindWorkerIp()
-        self.StartResourceThread()
         self.ConnectToSocket()
         self.CheckFogDeviceIsReady()
         self.StartOperation()
 
     def StartResourceThread(self):
-        if FogTester.resource_threads.get(self.url) is not None:
+        if FogTester.resource_threads.get(self.url) is None:
             FogTester.resource_threads[self.url] = ResourceInformation(self.url + ':' + self.ResourcePort)
             FogTester.resource_threads[self.url].start()
             ResultWriter.AddThreadInformation(self.i, "ResourceThreadStarted;" + str(now()))
@@ -185,14 +187,15 @@ class FogTester(Thread):
             self.err = True
 
         @sio.on("process_ready")
-        def process_ready(status):
-            if status:
+        def process_ready(message):
+            res = message.split(";")
+            if int(res[0]):
                 self.FogProcessIsReady = True
                 ResultWriter.AddThreadInformation(self.i, "ProcessReady;" + str(now()))
 
             else:
                 ResultWriter.AddThreadInformation(self.i, "ProcessCannotReady;" + str(now()))
-                logger.error("Thread No: " + self.i + "faced an error. Message: During Process Start")
+                logger.error("Thread No: " + self.i + " faced an error. Message: "+res[1])
                 sio.disconnect()
                 self.err = True
 
@@ -206,13 +209,13 @@ class FogTester(Thread):
             received_time = now()
             csvline = csv_line = "result;" + message + ";" + str(received_time)
             ResultWriter.AddThreadTimeInformation(self.i, csvline)
-            res = result.split(";")
+            res = message.split(";")
             data_index = int(res[0])
             if self.i == '0' and data_index % 50 == 0:
                 for i in range(len(self.RequestTimeList)):
                     request_time = self.RequestTimeList[i]
                     if data_index == request_time[0]:
-                        total_time = request_time[1] - received_time
+                        total_time =  received_time - request_time[1]
                         new_info = 'remain: ' + res[0] + "/" + str(
                             self.StopCriteria) + "  -  TotalTime: " + str(
                             total_time) + "  -  AddedQueue: " + res[2] + "  -  ProcessStarted: " + res[
@@ -231,7 +234,7 @@ class FogTester(Thread):
         while True:
             try:
                 # sio.connect('http://192.168.2.59:3000')
-                sio.connect(self.url+self.WorkerPort)
+                sio.connect(self.url + ":" + self.WorkerPort)
                 sio.emit("temp", "kadir")
                 break
             except Exception as e:
@@ -242,9 +245,9 @@ class FogTester(Thread):
         FogTester.ClosedThreads += 1
         ResultWriter.AddThreadInformation(self.i, "TheadStopped;" + str(now()))
         if FogTester.ClosedThreads >= FogTester.ThreadCount:
-            ResultWriter.TimerEvent()
+            ResultWriter.Obj.TimerEvent()
             print("Finished")
-            os.exit(1)
+            os._exit(1)
         sys.exit()
 
     def CheckFogDeviceIsReady(self):
@@ -264,19 +267,19 @@ class FogTester(Thread):
             self.sio.disconnect()
             self.StopThread()
         message = None
-        data_index = str(self.data_index)
+        data_index = self.data_index
         if self.data_index < self.Data.CalibrationLen:
-            message = data_index + ";1;" + str(self.Data.CalibrationData[self.data_index])
+            message = str(data_index) + "|1;" + str(self.Data.CalibrationData[self.data_index])
         else:
-            message = data_index + ";0;" + str(
-                self.Application.Data[(self.data_index - self.Data.CalibrationLen) % self.Data.TestDataLen])
+            message = str(data_index) + "|0;" + str(
+                self.Data.TestData[(self.data_index - self.Data.CalibrationLen) % self.Data.TestDataLen])
 
         self.data_index += 1
 
         request_time = now()
         self.sio.emit("sensor_data", message)
 
-        csv_line = "request;" + data_index + ";" + str(request_time)
+        csv_line = "request;" + str(data_index) + ";" + str(request_time)
         ResultWriter.AddThreadTimeInformation(self.i, csv_line)
 
         if self.i == '0' and data_index % 50 == 0:
@@ -287,7 +290,6 @@ class FogTester(Thread):
             self.StopThread()
 
     def StartOperation(self):
-        self.SendData()
         ResultWriter.AddThreadInformation(self.i, "FirstDataSent;" + str(now()))
         self.interval = SetInterval(self.SamplingPeriod, self.SendData)
 
@@ -329,11 +331,12 @@ def Main():
 
     index = 0
     for url, app_info in Config.Configuration.Servers.items():
-            for i in range(app_info['thread_count']):
-                thread = FogTester(str(index), url, app_info['worker_port'], app_info['resource_port'], GaitAnalysis, Config.Configuration.ApplicationTestType)
-                thread.start()
-                FogTester.threads.append(thread)
-                index += 1
+        for i in range(app_info['thread_count']):
+            thread = FogTester(str(index), url, app_info['worker_port'], app_info['resource_port'], GaitAnalysis,
+                               Config.Configuration.ApplicationTestType)
+            thread.start()
+            FogTester.threads.append(thread)
+            index += 1
 
     FogTester.ThreadCount = len(FogTester.threads)
 
