@@ -3,6 +3,7 @@ git reset -- hard
 git clean -fd
 git pull
 npm install
+cd ./
 node ./Config/CacheDeviceType.js
 forever restart Server.js
 forever restart LoadTest/FogETexResourceManager/index.js

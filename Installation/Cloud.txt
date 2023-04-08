@@ -33,7 +33,11 @@ git remote set-url origin https://kadirozlem:github_pat_11AB5HBWI0wJkQot3crJWH_D
 git config pull.ff only
 
 #Git Add Submodule Creditential
-git config submodule.LoadTest/FogETexResourceManager.url https://kadirozlem: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@github.com/kadirozlem/FogETexResourceManager.git
+cd LoadTest/FogETexResourceManager
+git remote set-url origin https://kadirozlem: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@github.com/kadirozlem/FogETexResourceManager.git
+
+#Turn Back
+cd ../..
 
 #Install All Modules For Project
 npm install
