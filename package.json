@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js",
-    "postinstall": "cd LoadTest/FogETexResourceManager & npm install"
+    "postinstall": "cd LoadTest/FogETexResourceManager && npm install && cs ../.."
   },
   "repository": {
     "type": "git",

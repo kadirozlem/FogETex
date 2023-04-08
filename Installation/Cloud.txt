@@ -32,7 +32,7 @@ git remote set-url origin https://kadirozlem:github_pat_11AB5HBWI0wJkQot3crJWH_D
 #Set git pull method as Fast Forward Only to eliminate warnings
 git config pull.ff only
 
-#Git Add Submodule Creditential
+#Git Add Submodule Credential
 cd LoadTest/FogETexResourceManager
 git remote set-url origin https://kadirozlem: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@github.com/kadirozlem/FogETexResourceManager.git
 
