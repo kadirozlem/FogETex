@@ -19,7 +19,7 @@ class TestType(Enum):
 
 
 class Configuration:
-    SendAllDataTimes = 9
+    SendAllDataTimes = 1
     FileWritePeriod = 5
     SamplingPeriod = 0.020
     FileDirectory = "./Results/"

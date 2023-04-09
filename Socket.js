@@ -158,7 +158,7 @@ module.exports=function (FogEtex) {
                 io.users[userId].emit("result", response);
 
                 if (!io.users_package[userId]) {
-                    io.users_package[userId] = {index: socket.user_index, request: 0, response: 1}
+                    io.users_package[userId] = {request: 0, response: 1}
                 } else {
                     io.users_package[userId].response++;
                 }
@@ -169,8 +169,6 @@ module.exports=function (FogEtex) {
         if(socket.DeviceType==Config.DeviceTypes.User){
             //If client is User, get small id to decrease communication message
             socket.userId = io.GetCandidateUserId();
-            socket.FileName =  Helper.DateTimeAsFilename()+'_'+socket.id;
-            socket.emit('filename', socket.FileName);
 
             socket.on("disconnect", (reason) => {
                 console.log("User disconnected " + reason)
@@ -188,7 +186,7 @@ module.exports=function (FogEtex) {
                 const message = `${socket.userId}|${msg}|${socket_received}`;
                 io.process_master.emit("sensor_data", message);
                 if (!io.users_package[socket.userId]) {
-                    io.users_package[socket.userId] = {index: socket.user_index, request: 1, response: 0}
+                    io.users_package[socket.userId] = {request: 1, response: 0}
                 } else {
                     io.users_package[socket.userId].request++;
                 }
@@ -204,6 +202,9 @@ module.exports=function (FogEtex) {
                 } else {
                     socket.emit("process_ready", "0;Master is not ready");
                 }
+
+                socket.FileName =  socket.user_index+'_'+Helper.DateTimeAsFilename()+'_'+socket.id+".json";
+                socket.emit('filename', socket.FileName);
             });
 
 

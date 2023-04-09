@@ -3,6 +3,7 @@ const Config = require("../../Config");
 const router = express.Router();
 const shell = require('shelljs')
 var pjson = require('../../package.json');
+const path = require('path');
 
 router.get('/', function (req, res, next) {
     const FogETex= req.app.FogETex;
@@ -37,5 +38,20 @@ router.get('/UpdateDevice', (req, res, next) => {
     res.redirect('/DeviceStatus');
     shell.exec('sh Update.sh')
 });
+
+router.get('/GetUserPackage',(req, res, next)=>{
+
+        const file_path= path.join(__dirname,'../../'+Config.UserPackageDirectory+req.query.filename)
+
+    res.sendFile(file_path,  function (err) {
+        if (err) {
+            next(err);
+        } else {
+            //next();
+        }
+    });
+    }
+)
+
 
 module.exports = router;

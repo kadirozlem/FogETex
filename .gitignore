@@ -185,3 +185,6 @@ dist
 
 # Config Cache
 Config/DeviceType.cache
+
+#Remove Test Results
+UserPackage

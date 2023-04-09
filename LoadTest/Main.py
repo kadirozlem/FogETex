@@ -9,6 +9,7 @@ from Application import GaitAnalysis
 import json
 import os
 import Config
+import requests
 
 GaitAnalysis.ReadAllData()
 
@@ -137,6 +138,7 @@ class FogTester(Thread):
         self.data_index = 0
         self.err = False
         self.RequestTimeList = []
+        self.FileName = None
         self.StopCriteria = self.Data.CalibrationLen + self.Data.TestDataLen * Config.Configuration.SendAllDataTimes
         ResultWriter.AddThreadInformation(i, "Feature;Value")
         ResultWriter.AddThreadInformation(i, "DeviceURL;" + self.Application.Name)
@@ -226,6 +228,12 @@ class FogTester(Thread):
             if data_index == 0:
                 ResultWriter.AddThreadInformation(self.i, "FirstResponseReceived;" + str(received_time))
 
+        @sio.on('filename')
+        def filename(file):
+            self.filename = file
+
+            ResultWriter.AddThreadInformation(self.i, "Filename;" + self.filename)
+
         @sio.on('disconnected')
         def disconnected():
             ResultWriter.AddThreadInformation(self.i, "User disconnected;" + str(now()))
@@ -244,12 +252,26 @@ class FogTester(Thread):
     def StopThread(self):
         FogTester.ClosedThreads += 1
         ResultWriter.AddThreadInformation(self.i, "TheadStopped;" + str(now()))
+        # if FogTester.ClosedThreads >= FogTester.ThreadCount:
+        #     ResultWriter.Obj.TimerEvent()
+        #     print("Finished")
+        #     os._exit(1)
+        #
+        # sys.exit()
+
+        Timer(Config.Configuration.FileWritePeriod, self.SaveRequestFile).start()
+
+    def SaveRequestFile(self):
+        r = requests.get(self.url + ":" + self.WorkerPort+"/GetUserPackage?filename="+self.filename)
+        with open(ResultWriter.Obj.directory+self.filename, 'wb') as f:
+            f.write(r.content)
+
         if FogTester.ClosedThreads >= FogTester.ThreadCount:
             ResultWriter.Obj.TimerEvent()
             print("Finished")
             os._exit(1)
-        sys.exit()
 
+        sys.exit()
     def CheckFogDeviceIsReady(self):
         logger.info(self.i + " wait device is ready!")
 

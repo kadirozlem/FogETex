@@ -3,7 +3,7 @@ var Config=require("./Config");
 const microtime = require("microtime");
 const { Manager  } = require("socket.io-client");
 const axios = require('axios');
-
+const fs = require('fs');
 
 
 class ResourceInfo {
@@ -169,8 +169,11 @@ class Resources {
         resourceInfo.user_package=temp_req_res
         resourceInfo.user_package_total={request:0, response:0}
         for(const key in temp_req_res){
-            resourceInfo.user_package_total.request+=temp_req_res[key].request;
-            resourceInfo.user_package_total.response+=temp_req_res[key].response;
+            const req_res = temp_req_res[key];
+            resourceInfo.user_package_total.request+=req_res.request;
+            resourceInfo.user_package_total.response+=req_res.response;
+            req_res.time = microtime.nowDouble();
+            fs.appendFile(Config.UserPackageDirectory+this.FogETex.Socket.users[key].FileName, JSON.stringify(req_res)+"\n", (err)=>{if (err) console.log(err);})
         }
 
         if(Config.DeviceType==Config.DeviceTypes.Broker){
