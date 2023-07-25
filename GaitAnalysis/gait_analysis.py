@@ -321,14 +321,15 @@ class GaitAnalysis:
         data_splitted = data.split(";")
         cal = int(data_splitted[0])
         raw_cap = int(data_splitted[1])
+        postfix= ";"+data_splitted[2] if len(data_splitted)>2 else ""
         features=self.FeatureExtraction.GetNormalizedValue(raw_cap,cal)
         if cal:
-            return -1
+            return "-1"+postfix
         else:
             test_predict = self.Model(torch.Tensor([[features]]))  # forward pass
             _, predicted = torch.max(test_predict, 1)  # get the index of the max log-probability
             data_predict = predicted.data.numpy()
-            return data_predict
+            return str(data_predict)+postfix
 
     @staticmethod
     def Initiate():

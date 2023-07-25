@@ -56,7 +56,7 @@ router.get('/GetBrokerIp',(req,res, next)=>{
          return;
       }
    }
-   res.json({LocalIp:null, err: "Broker device not yet connected!" })
+   res.json({LocalIP:null, err: "Broker device not yet connected!" })
 
 });
 

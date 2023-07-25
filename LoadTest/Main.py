@@ -141,7 +141,7 @@ class FogTester(Thread):
         self.FileName = None
         self.StopCriteria = self.Data.CalibrationLen + self.Data.TestDataLen * Config.Configuration.SendAllDataTimes
         ResultWriter.AddThreadInformation(i, "Feature;Value")
-        ResultWriter.AddThreadInformation(i, "DeviceURL;" + self.Application.Name)
+        ResultWriter.AddThreadInformation(i, "ApplicationName;" + self.Application.Name)
         ResultWriter.AddThreadInformation(i, "TestType;" + Config.TestType.getName(self.TestType))
         ResultWriter.AddThreadInformation(i, "DeviceURL;" + self.url)
         ResultWriter.AddThreadInformation(i, "ThreadIndex;" + self.i)
@@ -209,7 +209,7 @@ class FogTester(Thread):
         @sio.on("result")
         def result(message):
             received_time = now()
-            csvline = csv_line = "result;" + message + ";" + str(received_time)
+            csvline =  "result;" + message + ";" + str(received_time)
             ResultWriter.AddThreadTimeInformation(self.i, csvline)
             res = message.split(";")
             data_index = int(res[0])
@@ -236,7 +236,7 @@ class FogTester(Thread):
 
         @sio.on('disconnected')
         def disconnected():
-            ResultWriter.AddThreadInformation(self.i, "User disconnected;" + str(now()))
+            ResultWriter.AddThreadInformation(self.i, "SocketDisconnected;" + str(now()))
             logger.info(self.i + 'th User disconnected.')
 
         while True:

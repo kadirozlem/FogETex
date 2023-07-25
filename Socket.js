@@ -1,7 +1,7 @@
 var microtime = require('microtime')
 const Config = require("./Config");
 const Helper = require("./Helper");
-
+//const UserImitator = require('UserImitator');
 let users = {};
 
 module.exports=function (FogEtex) {
@@ -99,6 +99,7 @@ module.exports=function (FogEtex) {
                 const cpu_usage = resource_info.cpu_percentage.total.usage;
                 const memory_usage = 100*(resource_info.totalmem - resource_info.freemem) / resource_info.totalmem;
                 io.fog_children[socket.id].Busy = cpu_usage>Config.WorkerCPULimit || memory_usage> Config.WorkerMemoryLimit;
+                io.fog_children[socket.id].CPU_Usage = cpu_usage;
                 const arr=io.fog_children[socket.id].ResourceInfos;
                 arr.push(resource_info);
                 if (arr.length > Config.RM_BufferSize){
@@ -128,7 +129,7 @@ module.exports=function (FogEtex) {
                 for(var key in io.users ){
                     io.users[key].emit("application_disconnected", true);
                 }
-                process_master = null;
+                io.process_master = null;
             });
 
             //msg -> userid;status -> 12|1  or 12|1;AppNotCreate
@@ -144,15 +145,15 @@ module.exports=function (FogEtex) {
             //req: msg -> 'userId|socket_received|data_index;result;added_queue;process_started;process_finished'
             //response -> 'data_index;result;added_queue;process_started;process_finished;response_time'
             socket.on("result", (msg) => {
-                result_received_socket = microtime.nowDouble();
+                const result_received_socket = microtime.nowDouble();
                 const [userId, socket_received, result]=msg.split("|");
                 if (!io.users[userId]) {
                     //console.log(obj.username+'User not found!')
                     return
                 }
 
-                response_time = result_received_socket - parseFloat(socket_received);
-                response = result+";"+response_time;
+                const response_time = result_received_socket - parseFloat(socket_received);
+                const response = result+";"+response_time;
 
 
                 io.users[userId].emit("result", response);
@@ -203,6 +204,42 @@ module.exports=function (FogEtex) {
                     socket.emit("process_ready", "0;Master is not ready");
                 }
 
+                socket.FileName =  socket.user_index+'_'+Helper.DateTimeAsFilename()+'_'+socket.id+".json";
+                socket.emit('filename', socket.FileName);
+            });
+
+
+
+        }
+
+        if(socket.DeviceType==Config.DeviceTypes.ExternalUser){
+            //If client is User, get small id to decrease communication message
+            socket.userId = io.GetCandidateUserId();
+            //If client is User, get small id to decrease communication message
+            const userImitator = new UserImitator(socket.handshake.query.URL,socket);
+            socket.on("disconnect", (reason) => {
+                console.log("External User disconnected " + reason)
+                userImitator.close();
+                if (io.users[socket.userId]) {
+                    delete io.users[socket.userId]
+                }
+            });
+            //msg -> dataIndex|data -> 1|123;1
+            socket.on("sensor_data", (msg) => {
+                const socket_received = microtime.nowDouble();
+                const message = `${msg};${socket_received}`;
+                userImitator.emit("sensor_data", message);
+                if (!io.users_package[socket.userId]) {
+                    io.users_package[socket.userId] = {request: 1, response: 0}
+                } else {
+                    io.users_package[socket.userId].request++;
+                }
+            });
+
+            //user_index -> 1  #Created by user
+            //response -> false|msg   or true
+            socket.on("app_info", (user_index) => {
+                userImitator.appInfo();
                 socket.FileName =  socket.user_index+'_'+Helper.DateTimeAsFilename()+'_'+socket.id+".json";
                 socket.emit('filename', socket.FileName);
             });

@@ -92,7 +92,9 @@ class SingleThreadProcess:
                     record.process_finished = now()
                     self.sio.emit("result", record.PrepareResponse(result))
                 else:
-                    self.sio.emit("result",record.PrepareResponse(-1))
+                    data_splitted = record.data.split(";")
+                    postfix= ";"+data_splitted[2] if len(data_splitted)>2 else ""
+                    self.sio.emit("result",record.PrepareResponse("-1"+postfix))
             time.sleep(0.001)
 
 if __name__ == '__main__':

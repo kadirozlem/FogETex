@@ -140,7 +140,7 @@ class Resources {
             console.log(reason);
         });
 
-        socket.on("connect_error", () => {
+        socket.on("connect_error", (reason) => {
             console.log("Cannot connect");
         });
 
