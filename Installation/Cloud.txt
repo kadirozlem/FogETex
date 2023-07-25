@@ -21,20 +21,20 @@ sudo apt install git
 git --version
 
 #Pull Project From Git Repository
-git clone --recursive https://kadirozlem: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@github.com/kadirozlem/FogETex.git
+git clone --recursive https://kadirozlem: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@github.com/kadirozlem/FogETex.git
 
 #Change Directory
 cd FogETex/
 
 #Add Project Url To Update
-git remote set-url origin https://kadirozlem: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@github.com/kadirozlem/FogETex.git
+git remote set-url origin https://kadirozlem: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@github.com/kadirozlem/FogETex.git
 
 #Set git pull method as Fast Forward Only to eliminate warnings
 git config pull.ff only
 
 #Git Add Submodule Credential
 cd LoadTest/FogETexResourceManager
-git remote set-url origin https://kadirozlem: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@github.com/kadirozlem/FogETexResourceManager.git
+git remote set-url origin https://kadirozlem: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@github.com/kadirozlem/FogETexResourceManager.git
 
 #Turn Back
 cd ../..
