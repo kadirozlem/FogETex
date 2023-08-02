@@ -1,5 +1,5 @@
 const { Manager  } = require("socket.io-client");
-const Config = require("../Config");
+const Config = require("./Config");
 const microtime = require("microtime");
 
 class UserImitator{
