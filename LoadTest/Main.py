@@ -11,6 +11,7 @@ import os
 from Config import *
 import requests
 import geocoder
+import re
 
 GaitAnalysis.ReadAllData()
 
@@ -73,7 +74,7 @@ class ResultWriter:
         temp_dict = ResultWriter.ResourceInfo
         ResultWriter.ResourceInfo = {}
         for i in temp_dict:
-            filename = self.directory + "resource__" + i.replace(':', '_').replace('/', '_').replace('.', '_') + ".json"
+            filename = self.directory + "resource__" + re.sub('[^0-9a-zA-Z]+', '_', i) + ".json"
             answ = os.path.exists(filename)
             with open(filename, "a" if answ else "w") as f:
                 f.writelines(temp_dict[i])
