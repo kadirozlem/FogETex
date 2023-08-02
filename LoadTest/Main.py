@@ -169,46 +169,48 @@ class FogTester(Thread):
         ResultWriter.AddThreadInformation(self.i, "AssignFogNode_Longitude;" + FogTester.Longitude)
         try:
             response = requests.get(url)
-            assigned_time = now()
+            assigned_time = str(now())
             response_json = response.json()
             error = response_json.get("err")
-            if (error is None):
+            if (error is not None):
                 ResultWriter.AddThreadInformation(self.i, "AssignFogNode_Err:" + error + ";" + assigned_time)
-                logger.error("Thread No: " + self.i + " faced an error. Message: " + error)
-                self.StopThread()
+                logger.error("Thread No: " + self.i + " faced an error at AssignFogNode. Message: " + error)
+                self.StopThread(err=True)
             else:
                 brokerIp = response_json.get("IP")
-                brokerType = response_json.getString("type")
+                brokerType = response_json.get("type")
                 self.Server.BrokerIP = brokerIp
                 ResultWriter.AddThreadInformation(self.i, "BrokerIPAssigned:" + assigned_time)
                 ResultWriter.AddThreadInformation(self.i, "BrokerIP:" + brokerIp)
                 ResultWriter.AddThreadInformation(self.i, "BrokerType:" + brokerType)
-                distance = response.getString("distance")
-                ResultWriter.AddThreadInformation(self.i, "BrokerDistance:" + distance)
+                distance = response_json.get("distance")
+                ResultWriter.AddThreadInformation(self.i, "BrokerDistance:" + str(distance))
+                logger.info("Broker IP: "+brokerIp+" - Type: "+brokerType)
                 self.Server.IsWANDevice = brokerType == "WAN"
                 self.AssignWorkerDevice(brokerIp)
         except Exception as err:
-            ResultWriter.AddThreadInformation(self.i, "GetBrokerIp_Err:CloudConnectionFailed;" + str(now()))
-            logger.error("Thread No: " + self.i + " faced an error at AssignWorkerDevice. Message: " + str(err))
-            self.StopThread()
+            ResultWriter.AddThreadInformation(self.i, "AssignFogNode_Err:CloudConnectionFailed;" + str(now()))
+            logger.error("Thread No: " + self.i + " faced an error at AssignFogNode. Message: " + str(err))
+            self.StopThread(err=True)
 
     def AssignWorkerDevice(self, brokerIp):
         try:
             response = requests.get(self.Server.AssignWorkerDevice_URL(brokerIp))
-            assigned_time = now()
+            assigned_time = str(now())
             response_json = response.json()
             error = response_json.get("err")
-            if (error is None):
+            if (error is not None):
                 ResultWriter.AddThreadInformation(self.i, "AssignWorkerDevice_Err:" + error + ";" + assigned_time)
                 logger.error("Thread No: " + self.i + " faced an error at AssignWorkerDevice. Message: " + error)
-                self.StopThread()
+                self.StopThread(err=True)
             else:
                 workerIP = response_json.get("IP")
                 cpuUsage=response_json.get("CPU_Usage")
                 self.Server.WorkerIP = workerIP
+                logger.info("Worker Ip:" +workerIP)
                 ResultWriter.AddThreadInformation(self.i, "WorkerDeviceAssigned:" + assigned_time)
                 ResultWriter.AddThreadInformation(self.i, "WorkerIP:" + brokerIp)
-                ResultWriter.AddThreadInformation(self.i, "CPU_Usage:" + cpuUsage)
+                ResultWriter.AddThreadInformation(self.i, "CPU_Usage:" + str(cpuUsage))
                 if self.Server.IsWANDevice:
                     self.Server.IP  = self.Server.BrokerIP
                 else:
@@ -216,8 +218,8 @@ class FogTester(Thread):
 
         except Exception as err:
             ResultWriter.AddThreadInformation(self.i, "AssignWorkerDevice_Err:BrokerConnectionFailed;" + str(now()))
-            logger.error("Thread No: " + self.i + " faced an error. Message: " + str(err))
-            self.StopThread()
+            logger.error("Thread No: " + self.i + " faced an error at AssignWorkerDevice. Message: " + str(err))
+            self.StopThread(err=True)
 
     def ConnectToSocket(self):
         sio = socketio.Client()
@@ -297,7 +299,7 @@ class FogTester(Thread):
                 logger.error(self.url + " connection err")
                 time.sleep(1)
 
-    def StopThread(self):
+    def StopThread(self, err = False):
         FogTester.ClosedThreads += 1
         ResultWriter.AddThreadInformation(self.i, "TheadStopped;" + str(now()))
         # if FogTester.ClosedThreads >= FogTester.ThreadCount:
@@ -306,11 +308,11 @@ class FogTester(Thread):
         #     os._exit(1)
         #
         # sys.exit()
-
-        Timer(Configuration.FileWritePeriod, self.SaveRequestFile).start()
+        if not err:
+            Timer(Configuration.FileWritePeriod, self.SaveRequestFile).start()
 
     def SaveRequestFile(self):
-        r = requests.get(self.url + ":" + self.WorkerPort + "/GetUserPackage?filename=" + self.filename)
+        r = requests.get(self.Server.IP + ":" + self.WorkerPort + "/GetUserPackage?filename=" + self.filename)
         with open(ResultWriter.Obj.directory + self.filename, 'wb') as f:
             f.write(r.content)
 
@@ -326,7 +328,7 @@ class FogTester(Thread):
 
         while not self.FogProcessIsReady:
             if self.err:
-                self.StopThread()
+                self.StopThread(err=True)
 
             time.sleep(0.2)
 

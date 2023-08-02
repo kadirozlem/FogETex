@@ -25,7 +25,7 @@ class ServerInformation:
         return self.GetURLScheme() + self.IP + ":" + self.WorkerPort
 
     def GetResourceUrl(self, isWANDevice=False):
-        return self.GetURLScheme() + self.IP + ":" + self.ResourcePort("?URL="+self.WorkerIP+":"+self.ResourcePort if isWANDevice else "")
+        return self.GetURLScheme() + self.IP + ":" + self.ResourcePort+("?URL="+self.WorkerIP+":"+self.ResourcePort if isWANDevice else "")
 
     def GetURLScheme(self):
         if self.IsSecure:
