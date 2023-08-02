@@ -1,6 +1,7 @@
 var microtime = require('microtime')
 const Config = require("./Config");
 const Helper = require("./Helper");
+const UserImitator = require("./UserImitator");
 //const UserImitator = require('UserImitator');
 let users = {};
 
@@ -216,7 +217,7 @@ module.exports=function (FogEtex) {
             //If client is User, get small id to decrease communication message
             socket.userId = io.GetCandidateUserId();
             //If client is User, get small id to decrease communication message
-            const userImitator = new UserImitator(socket.handshake.query.URL,socket);
+            const userImitator = new UserImitator(socket.handshake.query.URL,socket,io);
             socket.on("disconnect", (reason) => {
                 console.log("External User disconnected " + reason)
                 userImitator.close();
@@ -227,8 +228,8 @@ module.exports=function (FogEtex) {
             //msg -> dataIndex|data -> 1|123;1
             socket.on("sensor_data", (msg) => {
                 const socket_received = microtime.nowDouble();
-                const message = `${msg};${socket_received}`;
-                userImitator.emit("sensor_data", message);
+                const message = `${socket_received}#${msg}`;
+                userImitator.sensorData(message);
                 if (!io.users_package[socket.userId]) {
                     io.users_package[socket.userId] = {request: 1, response: 0}
                 } else {
@@ -239,7 +240,7 @@ module.exports=function (FogEtex) {
             //user_index -> 1  #Created by user
             //response -> false|msg   or true
             socket.on("app_info", (user_index) => {
-                userImitator.appInfo();
+                userImitator.appInfo(user_index);
                 socket.FileName =  socket.user_index+'_'+Helper.DateTimeAsFilename()+'_'+socket.id+".json";
                 socket.emit('filename', socket.FileName);
             });

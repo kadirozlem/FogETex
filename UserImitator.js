@@ -1,10 +1,13 @@
 const { Manager  } = require("socket.io-client");
 const Config = require("../Config");
+const microtime = require("microtime");
 
 class UserImitator{
-    constructor(url,user_socket) {
+    constructor(url,user_socket, io) {
         this.url = url+Config.Port;
-
+        this.user_socket = user_socket;
+        this.io = io;
+        this.connectToSocket()
     }
 
     connectToSocket(){
@@ -25,22 +28,38 @@ class UserImitator{
             user_imitator.emit("application_disconnected", message)
         });
 
+        this.socket.on("result", function (msg){
+            const result_received_socket = microtime.nowDouble();
+            const [socket_received, result] =msg.split("#")
+
+            const response_time = result_received_socket - parseFloat(socket_received);
+            const response = result+";"+response_time;
+
+            user_imitator.emit("result", response);
+
+            if (!user_imitator.io.users_package[user_imitator.socket.userId]) {
+                user_imitator.io.users_package[user_imitator.socket.userId] = {request: 0, response: 1}
+            } else {
+                user_imitator.io.users_package[user_imitator.socket.userId].response++;
+            }
+        });
+
 
     }
     close(){
-
+        this.socket.close()
     }
 
-    sensorData(){
-
+    sensorData(msg){
+        this.socket("sensor_data",msg)
     }
 
-    emit(){
-
+    emit(eventName, msg){
+        this.user_socket.emit(eventName,msg)
     }
 
-    appInfo(){
-
+    appInfo(msg){
+        this.socket.emit("app_info",msg);
     }
 
 }
