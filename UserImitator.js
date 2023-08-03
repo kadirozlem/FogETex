@@ -4,7 +4,8 @@ const microtime = require("microtime");
 
 class UserImitator{
     constructor(url,user_socket, io) {
-        this.url = url+Config.Port;
+
+        this.url = url+":"+Config.Port;
         this.user_socket = user_socket;
         this.io = io;
         this.connectToSocket()
@@ -19,8 +20,18 @@ class UserImitator{
             }
         });
         this.socket = manager.socket("/");
+        this.socket.on("connect", function (){
+            console.log("user imitator connected")
+        });
+        this.socket.on("connect_error",function (err){
+            console.log("Worker: "+user_imitator.url + " disconnected!")
+        });
+        this.socket.on("disconnected",function (err){
+            console.log("Worker: "+user_imitator.url + " disconnected!")
+        });
 
         this.socket.on("process_ready", function (message){
+
             user_imitator.emit("process_ready", message)
         });
 
@@ -51,7 +62,7 @@ class UserImitator{
     }
 
     sensorData(msg){
-        this.socket("sensor_data",msg)
+        this.socket.emit("sensor_data",msg)
     }
 
     emit(eventName, msg){

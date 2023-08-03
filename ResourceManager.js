@@ -80,6 +80,11 @@ class Resources {
         }else if(Config.DeviceType == Config.DeviceTypes.Worker){
             this.FindBrokerIPAndConnect()
         }
+
+        if (!fs.existsSync(Config.UserPackageDirectory)){
+            fs.mkdirSync(Config.UserPackageDirectory, { recursive: true });
+        }
+
     }
 
     SendResourceInfo(info){
