@@ -48,10 +48,10 @@ class UserImitator{
 
             user_imitator.emit("result", response);
 
-            if (!user_imitator.io.users_package[user_imitator.socket.userId]) {
-                user_imitator.io.users_package[user_imitator.socket.userId] = {request: 0, response: 1}
+            if (!user_imitator.io.users_package[user_imitator.user_socket.userId]) {
+                user_imitator.io.users_package[user_imitator.user_socket.userId] = {request: 0, response: 1}
             } else {
-                user_imitator.io.users_package[user_imitator.socket.userId].response++;
+                user_imitator.io.users_package[user_imitator.user_socket.userId].response++;
             }
         });
 
