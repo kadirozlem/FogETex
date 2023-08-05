@@ -42,7 +42,7 @@ class ServerInformation:
 
     # Socket URL
     def GetSocketUrl(self, ip, isWANDevice=False):
-        return self.GetURLScheme() + ip + ":" + self.WorkerPort + ("?DeviceType=6" if isWANDevice else "")
+        return self.GetURLScheme() + ip + ":" + self.WorkerPort + ("?DeviceType=6&URL="+self.WorkerIP+":"+self.WorkerPort if isWANDevice else "")
 
     def GetUserPackage(self, ip, filename):
         return self.GetURLScheme() + ip + ":" + self.WorkerPort + "/GetUserPackage?filename=" + filename

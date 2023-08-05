@@ -147,7 +147,7 @@ class FogTester(Thread):
         ResultWriter.AddThreadInformation(i, "TestDataLength;" + str(self.Data.TestDataLen))
         ResultWriter.AddThreadInformation(i, "TestDataRepeatCount;" + str(Configuration.SendAllDataTimes))
         ResultWriter.AddThreadInformation(i, "ThreadCreated;" + str(now()))
-        pass
+
 
     def run(self):
         ResultWriter.AddThreadInformation(self.i, "ThreadStarted;" + str(now()))
@@ -159,6 +159,8 @@ class FogTester(Thread):
         self.StartOperation()
 
     def StartResourceThread(self):
+        if self.err:
+            return
         if FogTester.resource_threads.get(self.Server.IP) is None:
             FogTester.resource_threads[self.Server.IP] = ResourceInformation(self.Server)
             FogTester.resource_threads[self.Server.IP].start()
@@ -223,6 +225,8 @@ class FogTester(Thread):
             self.StopThread(err=True)
 
     def ConnectToSocket(self):
+        if self.err:
+            return
         sio = socketio.Client()
         self.sio = sio
 
@@ -250,6 +254,7 @@ class FogTester(Thread):
                 ResultWriter.AddThreadInformation(self.i, "ProcessCannotReady;" + str(now()))
                 logger.error("Thread No: " + self.i + " faced an error. Message: " + res[1])
                 sio.disconnect()
+                self.StopThread(err=True)
                 self.err = True
 
         @sio.on("test")
@@ -303,6 +308,7 @@ class FogTester(Thread):
     def StopThread(self, err = False):
         FogTester.ClosedThreads += 1
         ResultWriter.AddThreadInformation(self.i, "TheadStopped;" + str(now()))
+        self.err=True
         # if FogTester.ClosedThreads >= FogTester.ThreadCount:
         #     ResultWriter.Obj.TimerEvent()
         #     print("Finished")
@@ -313,7 +319,7 @@ class FogTester(Thread):
             Timer(Configuration.FileWritePeriod, self.SaveRequestFile).start()
 
     def SaveRequestFile(self):
-        r = requests.get(self.Server.IP + ":" + self.WorkerPort + "/GetUserPackage?filename=" + self.filename)
+        r = requests.get(self.Server.GetSocketUrl(self.Server.IP,False) + "/GetUserPackage?filename=" + self.filename)
         with open(ResultWriter.Obj.directory + self.filename, 'wb') as f:
             f.write(r.content)
 
@@ -325,6 +331,8 @@ class FogTester(Thread):
         sys.exit()
 
     def CheckFogDeviceIsReady(self):
+        if self.err:
+            return
         logger.info(self.i + " wait device is ready!")
 
         while not self.FogProcessIsReady:
@@ -365,6 +373,8 @@ class FogTester(Thread):
             self.StopThread()
 
     def StartOperation(self):
+        if self.err:
+            return
         ResultWriter.AddThreadInformation(self.i, "FirstDataSent;" + str(now()))
         self.interval = SetInterval(self.SamplingPeriod, self.SendData)
 
