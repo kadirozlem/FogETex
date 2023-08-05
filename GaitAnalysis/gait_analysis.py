@@ -95,6 +95,7 @@ class FeatureExtraction:
         self.Acceleration = [0] * (self.distance + 1)
         self.Jerk = None
         self.Calibration_Sample_Count = 0
+        self.IsNotCalibrated = True
 
         self.Normalizers = [StandartNormalizer(), StandartNormalizer(), StandartNormalizer(), StandartNormalizer()]
 
@@ -126,6 +127,7 @@ class FeatureExtraction:
                 if self.Calibration_Sample_Count > Config.SN_Cal_Start:
                     normalized_values.append(self.Normalizers[i].AddCalibrationValue(features[i]))
             else:
+                self.IsNotCalibrated=False
                 normalized_values.append(self.Normalizers[i].GetValue(features[i]))
         return normalized_values
 
@@ -319,7 +321,7 @@ class GaitAnalysis:
 
     def Predict(self, data):
         data_splitted = data.split(";")
-        cal = int(data_splitted[0])
+        cal = int(data_splitted[0]) and self.FeatureExtraction.IsNotCalibrated
         raw_cap = int(data_splitted[1])
         postfix= ";"+data_splitted[2] if len(data_splitted)>2 else ""
         features=self.FeatureExtraction.GetNormalizedValue(raw_cap,cal)

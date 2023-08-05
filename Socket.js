@@ -242,6 +242,9 @@ module.exports=function (FogEtex) {
             socket.on("app_info", (user_index) => {
                 userImitator.appInfo(user_index);
                 socket.FileName =  socket.user_index+'_'+Helper.DateTimeAsFilename()+'_'+socket.id+".json";
+                io.users[socket.userId] = socket;
+                socket.user_index = user_index;
+
                 socket.emit('filename', socket.FileName);
             });
 

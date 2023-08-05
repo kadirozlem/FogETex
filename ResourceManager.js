@@ -1,7 +1,7 @@
 var os = require("os");
-var Config=require("./Config");
+var Config = require("./Config");
 const microtime = require("microtime");
-const { Manager  } = require("socket.io-client");
+const {Manager} = require("socket.io-client");
 const axios = require('axios');
 const fs = require('fs');
 
@@ -41,7 +41,7 @@ class ResourceInfo {
                 var irq = this.cpu_times[cpu].irq - previous.cpu_times[cpu].irq;
                 var idle = this.cpu_times[cpu].idle - previous.cpu_times[cpu].idle;
                 var total = user + nice + sys + irq + idle;
-                diffence.cores.push({idle: idle, total: total, usage:(1-idle/total)*100});
+                diffence.cores.push({idle: idle, total: total, usage: (1 - idle / total) * 100});
                 total_idle += idle;
                 total_time += total;
             }
@@ -54,13 +54,13 @@ class ResourceInfo {
                 var irq = this.cpu_times[cpu].irq;
                 var idle = this.cpu_times[cpu].idle;
                 var total = user + nice + sys + irq + idle;
-                diffence.cores.push({idle: idle, total: total, usage:(1-idle/total)*100});
+                diffence.cores.push({idle: idle, total: total, usage: (1 - idle / total) * 100});
                 total_idle += idle;
                 total_time += total;
 
             }
         }
-        diffence.total = {idle: total_idle, total: total_time, usage:(1-total_idle/total_time)*100};
+        diffence.total = {idle: total_idle, total: total_time, usage: (1 - total_idle / total_time) * 100};
         //console.log("Idle: "+diffence.total.idle+ " - Total" +diffence.total.total+" - Usage:" +diffence.total.usage)
 
         return diffence;
@@ -70,39 +70,48 @@ class ResourceInfo {
 class Resources {
     constructor(FogETex) {
         this.FogETex = FogETex;
-        this.resourcesInfos=[];
-        this.previous=null;
+        this.resourcesInfos = [];
+        this.previous = null;
         this.tick();
         var t = this;
-        this.timer=setInterval(function(){t.tick()},Config.RM_SamplingPeriod);
-        if(Config.DeviceType == Config.DeviceTypes.Broker){
+        this.timer = setInterval(function () {
+            t.tick()
+        }, Config.RM_SamplingPeriod);
+        if (Config.DeviceType == Config.DeviceTypes.Broker) {
             this.ConnectParent(Config.CloudIp);
-        }else if(Config.DeviceType == Config.DeviceTypes.Worker){
+        } else if (Config.DeviceType == Config.DeviceTypes.Worker) {
             this.FindBrokerIPAndConnect()
         }
+
+        if (!fs.existsSync(Config.UserPackageDirectory)) {
+            fs.mkdirSync(Config.UserPackageDirectory, {recursive: true});
+        }
+
     }
 
-    SendResourceInfo(info){
+    SendResourceInfo(info) {
         //Send it to the User Interface
-        if(this.Socket){
-            this.Socket.emit("resource_info",info);
+        if (this.Socket) {
+            this.Socket.emit("resource_info", info);
         }
         this.FogETex.Socket.ui_clients['Home'].forEach(element => element.emit("resource_info", info))
     }
 
-    FindBrokerIPAndConnect(){
+    FindBrokerIPAndConnect() {
         const resourceObj = this;
         console.log('Trying to find Broker Ip.');
         axios.get(`http://${Config.CloudIp}:${Config.Port}/Cloud/GetBrokerIp`, {timeout: 3000})
             .then(res => {
-                if(res.data.err){
+                if (res.data.err) {
                     console.log("Broker IP couldn't find.")
                     console.log(res.data.err);
                     console.log()
-                    setTimeout(()=>{resourceObj.FindBrokerIPAndConnect()},1000);
-                }else{
+                    setTimeout(() => {
+                        resourceObj.FindBrokerIPAndConnect()
+                    }, 1000);
+                } else {
                     console.log("Broker IP has been found!")
-                    console.log("Broker IP: "+res.data.LocalIP)
+                    console.log("Broker IP: " + res.data.LocalIP)
                     resourceObj.ConnectParent(res.data.LocalIP);
                 }
             })
@@ -110,11 +119,13 @@ class Resources {
                 console.log("ResourceManager.FindBrokerIPAndConnect(): Connection error.")
                 console.log(err);
                 console.log();
-                setTimeout(()=>{resourceObj.FindBrokerIPAndConnect()},1000);
+                setTimeout(() => {
+                    resourceObj.FindBrokerIPAndConnect()
+                }, 1000);
             });
     }
 
-    ConnectParent(ip){
+    ConnectParent(ip) {
         const resourceObj = this;
         const manager = new Manager(`http://${ip}:${Config.Port}`, {
             autoConnect: true,
@@ -124,14 +135,14 @@ class Resources {
         });
         const socket = this.FogETex.ResourceSocket = this.Socket = manager.socket("/");
 
-        socket.on("connect",()=>{
+        socket.on("connect", () => {
             console.log("Resource Socket Connected!");
-            socket.emit('device_info', resourceObj.FogETex.DeviceInfo );
+            socket.emit('device_info', resourceObj.FogETex.DeviceInfo);
             const fog_children = resourceObj.FogETex.Socket.fog_children;
-            if(fog_children){
-                for(const key in fog_children){
+            if (fog_children) {
+                for (const key in fog_children) {
                     const child = fog_children[key];
-                    socket.emit('worker_device_info', key, child.DeviceInfo, child.ResourceInfos )
+                    socket.emit('worker_device_info', key, child.DeviceInfo, child.ResourceInfos)
                 }
             }
         });
@@ -146,44 +157,51 @@ class Resources {
 
     }
 
-    GetBulkData(){
+    GetBulkData() {
 
-        const cpu_data= this.resourcesInfos.map(x=> x.cpu_percentage.total.usage)
-        const cores=this.resourcesInfos[this.resourcesInfos.length-1].cpu_percentage.cores.map(x=>x.usage);
-        const request = this.resourcesInfos.map(x=> x.user_package_total.request);
-        const response = this.resourcesInfos.map(x=> x.user_package_total.response);
-        return {cpu:cpu_data, cores: cores, request:request, response: response }
+        const cpu_data = this.resourcesInfos.map(x => x.cpu_percentage.total.usage)
+        const cores = this.resourcesInfos[this.resourcesInfos.length - 1].cpu_percentage.cores.map(x => x.usage);
+        const request = this.resourcesInfos.map(x => x.user_package_total.request);
+        const response = this.resourcesInfos.map(x => x.user_package_total.response);
+        return {cpu: cpu_data, cores: cores, request: request, response: response}
     }
 
-    tick(){
-        var temp_req_res=this.FogETex.Socket.users_package
-        this.FogETex.Socket.users_package={}
-        var resourceInfo=new ResourceInfo(this.previous);
+    tick() {
+        var temp_req_res = this.FogETex.Socket.users_package
+        this.FogETex.Socket.users_package = {}
+        var resourceInfo = new ResourceInfo(this.previous);
         this.resourcesInfos.push(resourceInfo);
-        if(this.resourcesInfos.length>=Config.RM_BufferSize){
+        if (this.resourcesInfos.length >= Config.RM_BufferSize) {
             //var tempList=this.resourcesInfos;
             //this.resourcesInfos=[];
             this.resourcesInfos.shift()
         }
-        this.previous=resourceInfo;
-        resourceInfo.user_package=temp_req_res
-        resourceInfo.user_package_total={request:0, response:0}
-        for(const key in temp_req_res){
+        this.previous = resourceInfo;
+        resourceInfo.user_package = temp_req_res
+        resourceInfo.user_package_total = {request: 0, response: 0}
+        for (const key in temp_req_res) {
             const req_res = temp_req_res[key];
-            resourceInfo.user_package_total.request+=req_res.request;
-            resourceInfo.user_package_total.response+=req_res.response;
+            resourceInfo.user_package_total.request += req_res.request;
+            resourceInfo.user_package_total.response += req_res.response;
             req_res.time = microtime.nowDouble();
-            fs.appendFile(Config.UserPackageDirectory+this.FogETex.Socket.users[key].FileName, JSON.stringify(req_res)+"\n", (err)=>{if (err) console.log(err);})
+            try {
+                fs.appendFile(Config.UserPackageDirectory + this.FogETex.Socket.users[key].FileName, JSON.stringify(req_res) + "\n", (err) => {
+                    if (err) console.log(err);
+                })
+            } catch (err) {
+                console.log(err)
+                let a = 1;
+            }
         }
 
-        if(Config.DeviceType==Config.DeviceTypes.Broker){
-            const children=this.FogETex.Socket.fog_children;
-            resourceInfo.NodeBusy=true;
-            for(const key in children){
+        if (Config.DeviceType == Config.DeviceTypes.Broker) {
+            const children = this.FogETex.Socket.fog_children;
+            resourceInfo.NodeBusy = true;
+            for (const key in children) {
                 const child = children[key]
-                if(!child.Busy){
-                      resourceInfo.NodeBusy=false;
-                      break;
+                if (!child.Busy) {
+                    resourceInfo.NodeBusy = false;
+                    break;
                 }
             }
 
@@ -195,4 +213,5 @@ class Resources {
     }
 
 }
-module.exports=Resources;
+
+module.exports = Resources;
