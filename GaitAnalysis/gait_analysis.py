@@ -12,6 +12,11 @@ from model import LSTMModel, LSTM_Config
 import torch
 from torch.autograd import Variable
 from pathlib import Path
+import matplotlib as mpl
+
+# mpl.rcParams['figure.dpi'] = 600
+# cm = 1 / 2.54
+# plt.rcParams["figure.figsize"] = (12 * cm, 10 * cm)
 
 class Config:
     Header = 1
@@ -363,6 +368,8 @@ class GaitAnalysis:
                 train_length = int(len(step_list) * Config.Test_Train_Ratio)
                 train_set = step_list[:train_length]
                 test_set = step_list[train_length:]
+                if step_length=='40':
+                    GaitAnalysis.Plot(train_set[1])
                 # Prepare Normalized Train Data
                 for step in train_set:
                     capacitance_list = step.Capacitance[Config.File_Start_Sample:]
@@ -438,6 +445,40 @@ class GaitAnalysis:
         torch.save(model.state_dict(), Config.ModelPath)  # save model
         GaitAnalysis.PlotF1Scores(micro_f1s, macro_f1s, epochs_trained, losses)
 
+    @staticmethod
+    def Plot(data):
+        time = np.array(data.Time)/1000
+        Capacitance = np.array(data.Capacitance)
+        label = np.array(data.Labels)
+
+        fig,ax = plt.subplots()
+        # make a plot
+        ax.plot(time,
+                Capacitance,
+                color="red")
+        ax.set_xlabel("Time [s]")
+        ax.set_ylabel("Analog Value")
+        ax2=ax.twinx()
+        label_Arr =[
+        ]
+
+        for l in label.tolist():
+            if l==0:
+                label_Arr.append('TO')
+            elif l==1:
+                label_Arr.append('MS')
+            elif l==2:
+                label_Arr.append('HS')
+            else:
+                label_Arr.append('HO')
+
+        ax2.plot(time, label_Arr, color="blue")
+        ax2.set_ylabel("Gait Phase")
+
+    #ax2.yticks(label_Arr)
+
+        plt.show()
+        a=1
     @staticmethod
     def test_loop(model,xs_test_tensors,ys_test_tensors,  epoch,micro_f1s,macro_f1s):
         model.eval()  # set model to evaluation mode

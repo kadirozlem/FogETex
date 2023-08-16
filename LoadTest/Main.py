@@ -183,11 +183,11 @@ class FogTester(Thread):
                 brokerIp = response_json.get("IP")
                 brokerType = response_json.get("type")
                 self.Server.BrokerIP = brokerIp
-                ResultWriter.AddThreadInformation(self.i, "BrokerIPAssigned:" + assigned_time)
-                ResultWriter.AddThreadInformation(self.i, "BrokerIP:" + brokerIp)
-                ResultWriter.AddThreadInformation(self.i, "BrokerType:" + brokerType)
+                ResultWriter.AddThreadInformation(self.i, "BrokerIPAssigned;" + assigned_time)
+                ResultWriter.AddThreadInformation(self.i, "BrokerIP;" + brokerIp)
+                ResultWriter.AddThreadInformation(self.i, "BrokerType;" + brokerType)
                 distance = response_json.get("distance")
-                ResultWriter.AddThreadInformation(self.i, "BrokerDistance:" + str(distance))
+                ResultWriter.AddThreadInformation(self.i, "BrokerDistance;" + str(distance))
                 logger.info("Broker IP: "+brokerIp+" - Type: "+brokerType)
                 self.Server.IsWANDevice = brokerType == "WAN"
                 self.AssignWorkerDevice(brokerIp)
@@ -203,7 +203,7 @@ class FogTester(Thread):
             response_json = response.json()
             error = response_json.get("err")
             if (error is not None):
-                ResultWriter.AddThreadInformation(self.i, "AssignWorkerDevice_Err:" + error + ";" + assigned_time)
+                ResultWriter.AddThreadInformation(self.i, "AssignWorkerDevice_Err;" + error + ";" + assigned_time)
                 logger.error("Thread No: " + self.i + " faced an error at AssignWorkerDevice. Message: " + error)
                 self.StopThread(err=True)
             else:
@@ -211,9 +211,9 @@ class FogTester(Thread):
                 cpuUsage=response_json.get("CPU_Usage")
                 self.Server.WorkerIP = workerIP
                 logger.info("Worker Ip:" +workerIP)
-                ResultWriter.AddThreadInformation(self.i, "WorkerDeviceAssigned:" + assigned_time)
-                ResultWriter.AddThreadInformation(self.i, "WorkerIP:" + brokerIp)
-                ResultWriter.AddThreadInformation(self.i, "CPU_Usage:" + str(cpuUsage))
+                ResultWriter.AddThreadInformation(self.i, "WorkerDeviceAssigned;" + assigned_time)
+                ResultWriter.AddThreadInformation(self.i, "WorkerIP;" + brokerIp)
+                ResultWriter.AddThreadInformation(self.i, "CPU_Usage;" + str(cpuUsage))
                 if self.Server.IsWANDevice:
                     self.Server.IP  = self.Server.BrokerIP
                 else:
@@ -356,7 +356,7 @@ class FogTester(Thread):
             message = str(data_index) + "|1;" + str(self.Data.CalibrationData[data_index])
         else:
             message = str(data_index) + "|0;" + str(
-                self.Data.TestData[(self.data_index - self.Data.CalibrationLen) % self.Data.TestDataLen])
+                self.Data.TestData[(data_index - self.Data.CalibrationLen) % self.Data.TestDataLen])
 
 
         request_time = now()

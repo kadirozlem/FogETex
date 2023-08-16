@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CsvFileAttributes">
+    <option name="attributeMap">
+      <map>
+        <entry key="\Results\2023_08_09___08_25_40Android\0.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value=";" />
+            </Attribute>
+          </value>
+        </entry>
+        <entry key="\Results\2023_08_09___08_25_40Android\0_ThreadInformation.csv">
+          <value>
+            <Attribute>
+              <option name="separator" value=";" />
+            </Attribute>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

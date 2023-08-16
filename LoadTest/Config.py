@@ -71,7 +71,7 @@ class Configuration:
     FileWritePeriod = 5
     SamplingPeriod = 0.020
     FileDirectory = "./Results/"
-    FilePostfix = "FogEtex"
+    FilePostfix = "Sim_LTE"
     ApplicationTestType = TestType.System
 
 
