@@ -7,9 +7,6 @@ const  DeviceInfo = require('./DeviceInfo')
 const app = require('./UserInterface')
 const ResourceManager= require('./ResourceManager')
 
-
-
-
 const server = http.createServer(app);
 const io = new Server(server);
 //Create a object to access application variables to share info and methods.
