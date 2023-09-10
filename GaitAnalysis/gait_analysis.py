@@ -12,6 +12,7 @@ from model import LSTMModel, LSTM_Config
 import torch
 from torch.autograd import Variable
 from pathlib import Path
+import re
 
 class Config:
     Header = 1
@@ -321,8 +322,8 @@ class GaitAnalysis:
 
     def Predict(self, data):
         data_splitted = data.split(";")
-        cal = int(data_splitted[0]) and self.FeatureExtraction.IsNotCalibrated
-        raw_cap = int(data_splitted[1])
+        cal = int(re.sub("[^0-9]","", data_splitted[0])) and self.FeatureExtraction.IsNotCalibrated
+        raw_cap = int(re.sub("[^0-9]","", data_splitted[1]))
         postfix= ";"+data_splitted[2] if len(data_splitted)>2 else ""
         features=self.FeatureExtraction.GetNormalizedValue(raw_cap,cal)
         if cal:
