@@ -242,4 +242,8 @@ cython_debug/
 #FogETex - LoadTest
 Results
 ProcessedResults
+ProcessedSample
+ProcessedMinus
+SampleTest
+MinusTest
 OldResults

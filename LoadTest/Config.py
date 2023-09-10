@@ -24,8 +24,10 @@ class ServerInformation:
     def GetWorkerURL(self):
         return self.GetURLScheme() + self.IP + ":" + self.WorkerPort
 
-    def GetResourceUrl(self, isWANDevice=False):
-        return self.GetURLScheme() + self.IP + ":" + self.ResourcePort+("?URL="+self.WorkerIP+":"+self.ResourcePort if isWANDevice else "")
+    def GetResourceUrl(self, isWANDevice=False, ip = None):
+        if ip is None:
+            ip= self.IP
+        return self.GetURLScheme() + ip + ":" + self.ResourcePort+("?URL="+self.WorkerIP+":"+self.ResourcePort if isWANDevice else "")
 
     def GetURLScheme(self):
         if self.IsSecure:
@@ -69,12 +71,16 @@ class TestType(Enum):
 class Configuration:
     SendAllDataTimes = 1
     FileWritePeriod = 5
+    TestDataLength = 300 #18000
     SamplingPeriod = 0.020
     FileDirectory = "./Results/"
-    FilePostfix = "Sim_LTE"
-    ApplicationTestType = TestType.System
+    FilePostfix = "Test"
+    ApplicationTestType = TestType.Cloud
 
 
 Configuration.Servers = [
     ServerInformation(ip='164.92.168.129', worker_port='27592', resource_port='17796', thread_count=1, is_secure=False)
+    #ServerInformation(ip='192.168.2.125', worker_port='27592', resource_port='17796', thread_count=1, is_secure=False)
+
+    #ServerInformation(ip='192.168.2.151', worker_port='27592', resource_port='17796', thread_count=1, is_secure=False)
 ]

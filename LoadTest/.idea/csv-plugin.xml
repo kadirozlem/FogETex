@@ -3,14 +3,7 @@
   <component name="CsvFileAttributes">
     <option name="attributeMap">
       <map>
-        <entry key="\Results\2023_08_09___08_25_40Android\0.csv">
-          <value>
-            <Attribute>
-              <option name="separator" value=";" />
-            </Attribute>
-          </value>
-        </entry>
-        <entry key="\Results\2023_08_09___08_25_40Android\0_ThreadInformation.csv">
+        <entry key="\Results\2023_08_19___02_04_19Sim_WiFi_Full\0_ThreadInformation.csv">
           <value>
             <Attribute>
               <option name="separator" value=";" />

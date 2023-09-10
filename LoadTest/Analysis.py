@@ -31,8 +31,8 @@ class Configuration:
 
 
 class FileOperations:
-    ResultDirectory = './Results/'
-    ProcessedResults = './ProcessedResults/'
+    ResultDirectory = './MinusTest/'
+    ProcessedResults = './ProcessedMinus/'
 
     @staticmethod
     def GetResultsDirectoryNames():
@@ -146,8 +146,8 @@ class Results:
         self.GroupName = self.directory[21:]
         self.AddGroup()
         self.Files = FileOperations.GetFiles(self.directory)
-        # self.AnalysisRequestResponseCount()
-        # self.AnalysisRequestResponseTime()
+        self.AnalysisRequestResponseCount()
+        self.AnalysisRequestResponseTime()
         self.AnalysisResourceFiles()
 
 
@@ -174,6 +174,7 @@ class Results:
                             print()
                         else:
                             request.AddResult(sample)
+                requests = [x for x in requests if hasattr(x, 'Result')]
                 requests.sort(key=lambda x:x.index)
                 directory = FileOperations.ProcessedResults + self.directory + "/" + filename
                 Results.PlotRequestResponseTime([x for x in requests if x.Result=="-1"], directory+"_calibration/", "work_time")
@@ -258,7 +259,7 @@ class Results:
 
             records = FileOperations.ReadJsonFile(self.directory, filename)
             filename = filename.replace(".json", "")
-            csv_lines = ["timestamp;process_time;cpu_usage;memory_usage;total_memory\n"]
+            csv_lines = ["timestamp;process_time;cpu_usage;memory_usage;total_memory;rx;tx;bandwidth\n"]
             processed_records = []
             start_time = None
             for record in records:
@@ -267,10 +268,14 @@ class Results:
                     start_time = processed_record[0]
                 csv_lines.append( ";".join([str(x) for x in processed_record]) + "\n")
                 processed_records.append(processed_record)
-            directory = FileOperations.ProcessedResults + self.directory+'/'
+            directory = FileOperations.ProcessedResults + self.directory+'/'+filename+'/'
             FileOperations.WriteLines(directory, filename+".csv", csv_lines)
-            Results.PlotCPUTimes(processed_records, directory, filename)
-            Results.PlotMemoryUsage(processed_records, directory, filename)
+            Results.PlotCPUTimes(processed_records, directory, "cpu_usage")
+            Results.PlotMemoryUsage(processed_records, directory, "memory_usage")
+            Results.PlotReceivedBandwidth(processed_records, directory, "received_bandwidth")
+            Results.PlotTransferredBandwidth(processed_records, directory, "transferred_bandwidth")
+            Results.PlotNetworkBandwidth(processed_records, directory, "network_bandwidth")
+
 
     @staticmethod
     def ProcessResourceRecord(record, start_time):
@@ -279,13 +284,15 @@ class Results:
         cpu_usage = record["cpu_percentage"]["total"]["usage"]
         memory_usage = (record["totalmem"] - record["freemem"]) / record["totalmem"] * 100
         total_memory = record["totalmem"]
+        rx = record["network_bandwidth"]["RX"]["Bytes"]/1000*8
+        tx = record["network_bandwidth"]["TX"]["Bytes"]/1000*8
+        bandwidth = rx+tx
 
 
-        return [timestamp, process_time, cpu_usage, memory_usage, total_memory]
+        return [timestamp, process_time, cpu_usage, memory_usage, total_memory, rx, tx, bandwidth]
 
     @staticmethod
     def PlotCPUTimes(processed_records, directory, filename):
-        filename = "cpu_usage_"+filename
         x = [x[1] for x in processed_records]
         y = [x[2] for x in processed_records]
         x_title = "time [s]"
@@ -295,11 +302,37 @@ class Results:
 
     @staticmethod
     def PlotMemoryUsage(processed_records, directory, filename):
-        filename = "memory_usage_"+filename
         x = [x[1] for x in processed_records]
         y = [x[3] for x in processed_records]
         x_title = "time [s]"
-        y_title = "CPU Usage [%]"
+        y_title = "Memory Usage [%]"
+        Results.PlotLineGraph(x, y, x_title, y_title, directory,filename)
+        return y
+
+    @staticmethod
+    def PlotReceivedBandwidth(processed_records, directory, filename):
+        x = [x[1] for x in processed_records]
+        y = [x[5] for x in processed_records]
+        x_title = "time [s]"
+        y_title = "Received Data [kbps]"
+        Results.PlotLineGraph(x, y, x_title, y_title, directory,filename)
+        return y
+
+    @staticmethod
+    def PlotTransferredBandwidth(processed_records, directory, filename):
+        x = [x[1] for x in processed_records]
+        y = [x[6] for x in processed_records]
+        x_title = "time [s]"
+        y_title = "Transferred Data [kbps]"
+        Results.PlotLineGraph(x, y, x_title, y_title, directory,filename)
+        return y
+
+    @staticmethod
+    def PlotNetworkBandwidth(processed_records, directory, filename):
+        x = [x[1] for x in processed_records]
+        y = [x[7] for x in processed_records]
+        x_title = "time [s]"
+        y_title = "Network BandWidth [kbps]"
         Results.PlotLineGraph(x, y, x_title, y_title, directory,filename)
         return y
 
@@ -342,7 +375,7 @@ class Results:
         plt.savefig(path + '.eps', bbox_inches='tight', transparent=True)
         plt.savefig(path + '.png', bbox_inches='tight')
         plt.savefig(path + '.svg', bbox_inches='tight', format="svg", transparent=True)
-        plt.savefig(path + '.tiff', bbox_inches='tight')
+        #plt.savefig(path + '.tiff', bbox_inches='tight')
 
 
 def Main():

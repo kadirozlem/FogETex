@@ -135,7 +135,7 @@ class FogTester(Thread):
         self.err = False
         self.RequestTimeList = []
         self.FileName = None
-        self.StopCriteria = self.Data.CalibrationLen + self.Data.TestDataLen * Configuration.SendAllDataTimes
+        self.StopCriteria = self.Data.CalibrationLen + Configuration.TestDataLength
         ResultWriter.AddThreadInformation(i, "Feature;Value")
         ResultWriter.AddThreadInformation(i, "ApplicationName;" + self.Application.Name)
         ResultWriter.AddThreadInformation(i, "TestType;" + TestType.getName(self.TestType))
@@ -144,7 +144,7 @@ class FogTester(Thread):
         ResultWriter.AddThreadInformation(i, "DataUserNo;" + self.Data.UserNo)
         ResultWriter.AddThreadInformation(i, "DataStepLength;" + self.Data.StepLength)
         ResultWriter.AddThreadInformation(i, "CalibrationDataLength;" + str(self.Data.CalibrationLen))
-        ResultWriter.AddThreadInformation(i, "TestDataLength;" + str(self.Data.TestDataLen))
+        ResultWriter.AddThreadInformation(i, "TestDataLength;" + str(Configuration.TestDataLength))
         ResultWriter.AddThreadInformation(i, "TestDataRepeatCount;" + str(Configuration.SendAllDataTimes))
         ResultWriter.AddThreadInformation(i, "ThreadCreated;" + str(now()))
 
@@ -162,15 +162,34 @@ class FogTester(Thread):
         if self.err:
             return
         if FogTester.resource_threads.get(self.Server.IP) is None:
-            FogTester.resource_threads[self.Server.IP] = ResourceInformation(self.Server)
+            resource_url = self.Server.GetResourceUrl(self.Server.IsWANDevice)
+            FogTester.resource_threads[self.Server.IP] = ResourceInformation(resource_url, self.Server.IsWANDevice)
             FogTester.resource_threads[self.Server.IP].start()
-            ResultWriter.AddThreadInformation(self.i, "ResourceThreadStarted;" + str(now()))
+            ResultWriter.AddThreadInformation(self.i, "WorkerResourceThreadStarted;" + str(now()))
+        else:
+            logger.error("Thread No: " + self.i + " faced an error at Worker Resource Device Connection!")
+
+        if Configuration.ApplicationTestType == TestType.System:
+            if not self.Server.IsWANDevice:
+                if FogTester.resource_threads.get(self.Server.BrokerIP) is None:
+                    resource_url = self.Server.GetResourceUrl(False, self.Server.BrokerIP)
+                    FogTester.resource_threads[self.Server.BrokerIP] = ResourceInformation(resource_url, False)
+                    FogTester.resource_threads[self.Server.BrokerIP].start()
+                    ResultWriter.AddThreadInformation(self.i, "BrokerResourceThreadStarted;" + str(now()))
+
+            if FogTester.resource_threads.get(self.Server.CloudIP) is None:
+                resource_url = self.Server.GetResourceUrl(False, self.Server.CloudIP)
+                FogTester.resource_threads[self.Server.CloudIP] = ResourceInformation(resource_url, False)
+                FogTester.resource_threads[self.Server.CloudIP].start()
+                ResultWriter.AddThreadInformation(self.i, "CloudResourceThreadStarted;" + str(now()))
+
 
     def AssignFogNode(self, CloudUrl):
         url = CloudUrl + "?lat={}&lon={}".format(FogTester.Latitude, FogTester.Longitude)
         ResultWriter.AddThreadInformation(self.i, "AssignFogNode_Latitude;" + FogTester.Latitude)
         ResultWriter.AddThreadInformation(self.i, "AssignFogNode_Longitude;" + FogTester.Longitude)
         try:
+            ResultWriter.AddThreadInformation(self.i, "AssignFogNodeRequested;" + str(now()))
             response = requests.get(url)
             assigned_time = str(now())
             response_json = response.json()
@@ -198,6 +217,8 @@ class FogTester(Thread):
 
     def AssignWorkerDevice(self, brokerIp):
         try:
+            ResultWriter.AddThreadInformation(self.i, "AssignWorkerDeviceRequested;" + str(now()))
+
             response = requests.get(self.Server.AssignWorkerDevice_URL(brokerIp))
             assigned_time = str(now())
             response_json = response.json()
@@ -380,12 +401,10 @@ class FogTester(Thread):
 
 
 class ResourceInformation(Thread):
-    def __init__(self, server):
+    def __init__(self, url, isWANDevice):
         Thread.__init__(self)
-        self.Server = server
-
-        self.url = self.Server.GetResourceUrl(self.Server.IsWANDevice)
-        if self.Server.IsWANDevice:
+        self.url = url
+        if isWANDevice:
             self.worker_url = self.url.split("?URL=")[1]
 
 
