@@ -55,6 +55,10 @@ class UserImitator{
             }
         });
 
+        this.socket.on("filename",function (msg){
+            user_imitator.emit("filename",msg);
+        })
+
 
     }
     close(){
