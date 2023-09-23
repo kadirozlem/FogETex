@@ -514,7 +514,11 @@ class GaitAnalysis:
                                                     )
             plt.savefig(Config.Test_Results_Directory+f"cm_norm_{epoch + 1}.png", bbox_inches='tight', pad_inches=1)
             plt.clf()
-
+            csv_lines = ["DataTrue;DataPrediction\n"]
+            csv_lines.extend([f"{x[0]};{x[1]}\n" for x in list(zip(data_true, data_prediction))])
+            os.makedirs(Config.Test_Results_Directory, exist_ok=True)
+            with open(Config.Test_Results_Directory + f"cm_norm_{epoch + 1}.csv", 'a') as file:
+                file.writelines(csv_lines)
         micro_f1s.append(micro_f1 / xs_test_tensors.shape[0])  # append f1 score to list
         macro_f1s.append(macro_f1 / xs_test_tensors.shape[0])  # append f1 score to list
         model.train()
@@ -522,6 +526,20 @@ class GaitAnalysis:
     @staticmethod
     def PlotF1Scores(micro_f1s, macro_f1s, epochs_trained, losses):
         # Plot F1 score
+        csv_lines =["Epoch;F1Scores\n"]
+        for i in list(range(epochs_trained)):
+                csv_lines.append(f"{i};{macro_f1s[i]}\n")
+        os.makedirs(Config.Test_Results_Directory, exist_ok=True)
+        with open(Config.Test_Results_Directory + "f1scores.csv", 'a') as file:
+            file.writelines(csv_lines)
+
+        csv_lines = ["Epoch;Losses\n"]
+        for i in list(range(epochs_trained)):
+            csv_lines.append(f"{i};{losses[i]}\n")
+        os.makedirs(Config.Test_Results_Directory, exist_ok=True)
+        with open(Config.Test_Results_Directory + "losses.csv", 'a') as file:
+            file.writelines(csv_lines)
+
         plt.clf()
         plt.plot(list(range(epochs_trained)), micro_f1s, label='Micro F1')
         plt.plot(list(range(epochs_trained)), macro_f1s, label='Macro F1')

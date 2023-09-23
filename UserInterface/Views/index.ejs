@@ -128,21 +128,6 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <div class="card alert">
-                                    <div class="card-title">
-                                        <h4><i class="fa fa-area-chart"></i> Request / Response</h4>
-                                    </div>
-                                    <div class="request_response-chart">
-                                        <!--                                        <div id="cpu-load" class="cpu-load"></div>-->
-                                        <canvas id="request_response"></canvas>
-
-                                    </div>
-                                </div>
-                                <!-- /# card -->
-                            </div>
-                        </div>
                     </div>
                     <div class="col-lg-7 col-md-7 col-sm12 system_info_card">
                         <div class="row">
@@ -209,7 +194,8 @@
 
                         </div>
                         <div class="row">
-                            <div class="col-lg-12">
+                            <!--  column -->
+                            <div class="col-lg-6">
                                 <div class="card alert">
                                     <div class="card-title">
                                         <h4><i class="fa fa-area-chart"></i> CPU Load</h4>
@@ -223,13 +209,60 @@
                                 <!-- /# card -->
                             </div>
                             <!-- /# column -->
+                            <!--  column -->
+                            <div class="col-lg-6">
+                                <div class="card alert">
+                                    <div class="card-title">
+                                        <h4><i class="fa fa-area-chart"></i> Memory Usage</h4>
+                                    </div>
+                                    <div class="memory-usage-chart">
+                                        <!--                                        <div id="cpu-load" class="cpu-load"></div>-->
+                                        <canvas id="memory-usage"></canvas>
+
+                                    </div>
+                                </div>
+                                <!-- /# card -->
+                            </div>
+                            <!-- /# column -->
                         </div>
-                        <div class="row justify-content-center" id="cpu_core_infos">
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="card alert">
+                                    <div class="card-title">
+                                        <h4><i class="fa fa-area-chart"></i> Request / Response</h4>
+                                    </div>
+                                    <div class="request_response-chart">
+                                        <!--                                        <div id="cpu-load" class="cpu-load"></div>-->
+                                        <canvas id="request_response"></canvas>
+
+                                    </div>
+                                </div>
+                                <!-- /# card -->
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="card alert">
+                                    <div class="card-title">
+                                        <h4><i class="fa fa-area-chart"></i> Bandwidth Send / Receive [kbps]</h4>
+                                    </div>
+                                    <div class="bandwidth-chart">
+                                        <!--                                        <div id="cpu-load" class="cpu-load"></div>-->
+                                        <canvas id="bandwidth"></canvas>
+
+                                    </div>
+                                </div>
+                                <!-- /# card -->
+                            </div>
+
+                        </div>
 
 
-                        </div>
 
                     </div>
+
+                </div>
+                <div class="row justify-content-center" id="cpu_core_infos">
+
+
                 </div>
 
 
@@ -309,13 +342,13 @@
         }
     <% } %>
 
-    ChartObject = function (canvasId, title, datasize = 102, labels = null) {
+    ChartObject = function (canvasId, title, datasize = 102, labels = null, max_y=100) {
         this.canvasId = canvasId;
         this.title = title;
         this.datasize = datasize;
         this.labels = labels
         this.min_y = 0;
-        this.max_y = 100;
+        this.max_y = max_y;
 
 
         this.Initialize = function () {
@@ -342,7 +375,7 @@
                             }
                         },
                         y: {
-                            max: 100,
+                            suggestedMax: this.max_y,
                             min: 0,
 
                         }
@@ -394,9 +427,18 @@
     CPULoad.createDataSet(['CPU Utilization']);
     CPULoad.Initialize();
 
+    MemoryUsage = new ChartObject('memory-usage', 'Memory Usage');
+    MemoryUsage.createDataSet(['Memory Usage']);
+    MemoryUsage.Initialize();
+
     RequestResponseChart = new ChartObject('request_response', 'Request / Response');
-    RequestResponseChart.createDataSet(['Reqeust','Response']);
+    RequestResponseChart.createDataSet(['Request','Response']);
     RequestResponseChart.Initialize();
+
+    BandwidthChart = new ChartObject('bandwidth', 'Send / Receive');
+    BandwidthChart.max_y=200;
+    BandwidthChart.createDataSet(['Send','Receive']);
+    BandwidthChart.Initialize();
 
 
 </script>
@@ -463,10 +505,12 @@
     });
 
     socket.on('resource_info', function (info) {
+        test_info = info;
         //console.log(info);
         //CPU Load Graph
         CPULoad.AddData([info.cpu_percentage.total.usage]);
         RequestResponseChart.AddData([info.user_package_total.request, info.user_package_total.response]);
+        BandwidthChart.AddData([info.network_bandwidth.TX.Bytes/10, info.network_bandwidth.RX.Bytes/10])
         Update_Index++;
         //CPU Core Infos
         if (Update_Index % 2 == 0) {
@@ -486,7 +530,7 @@
         const memory_usage = parseInt(100 * (info.totalmem - info.freemem) / info.totalmem)
         $('#ram_card .stat-digit').html(memory_usage + '%')
         ChangeProgressBar('#ram_card .progress-bar', memory_usage/100);
-
+        MemoryUsage.AddData([memory_usage]);
         //circleprogress.Change(info.cpu_percentage.total.usage);
     });
     socket.on('bulk_data', function (data) {
@@ -498,8 +542,13 @@
                 Core_CircleBars.push(circle_progress);
             }
         }
-        CPULoad.AddBulkData([data.cpu])
+        CPULoad.AddBulkData([data.cpu]);
         RequestResponseChart.AddBulkData([data.request, data.response]);
+        MemoryUsage.AddBulkData([data.memory]);
+        bandwidth_tx = data.bandwidth_tx.map(x=> x/1000)
+        bandwidth_rx = data.bandwidth_rx.map(x=> x/1000)
+
+        BandwidthChart.AddBulkData([bandwidth_tx,bandwidth_rx]);
     });
 
     socket.on('device_info', function (obj) {

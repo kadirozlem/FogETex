@@ -4,6 +4,8 @@ const microtime = require("microtime");
 const {Manager} = require("socket.io-client");
 const axios = require('axios');
 const fs = require('fs');
+const config = require("./LoadTest/FogETexResourceManager/Config");
+const childprocess = require("child_process");
 
 
 class ResourceInfo {
@@ -15,6 +17,8 @@ class ResourceInfo {
         this.totalmem = os.totalmem();
         this.system_uptime = os.uptime();
         this.process_uptime = process.uptime();
+        this.network_stat = this.networkStats();
+        this.network_bandwidth = this.bandwidth(previous)
     }
 
     cpuInfo() {
@@ -64,6 +68,48 @@ class ResourceInfo {
         //console.log("Idle: "+diffence.total.idle+ " - Total" +diffence.total.total+" - Usage:" +diffence.total.usage)
 
         return diffence;
+    }
+
+    networkStats() {
+        if (config.IsWindows) {
+            let response = childprocess.execSync('netstat -e').toString().match(/\d+/g)
+            return {
+                RX: {
+                    Bytes: parseInt(response[0]),
+                    Package: parseInt(response[2]) + parseInt(response[4])
+                },
+                TX: {
+                    Bytes: parseInt(response[1]),
+                    Package: parseInt(response[3]) + parseInt(response[5])
+                }
+            }
+        } else {
+            let response = childprocess.execSync('cat /sys/class/net/eth0/statistics/rx_bytes '
+                +'&& cat /sys/class/net/eth0/statistics/rx_packets '
+                +'&& cat /sys/class/net/eth0/statistics/tx_bytes '
+                +'&& cat /sys/class/net/eth0/statistics/tx_packets').toString().match(/\d+/g);
+            return {
+                RX: {
+                    Bytes: parseInt(response[0]),
+                    Package: parseInt(response[1])
+                },
+                TX: {
+                    Bytes: parseInt(response[2]),
+                    Package: parseInt(response[3])
+                }
+            }
+        }
+    }
+
+    bandwidth(previous) {
+        let bw = {RX: {Bytes: 0, Package: 0}, TX: {Bytes: 0, Package: 0}}
+        if (previous) {
+            bw.RX.Bytes = this.network_stat.RX.Bytes - previous.network_stat.RX.Bytes;
+            bw.RX.Package = this.network_stat.RX.Package - previous.network_stat.RX.Package;
+            bw.TX.Bytes = this.network_stat.TX.Bytes - previous.network_stat.TX.Bytes;
+            bw.TX.Package = this.network_stat.TX.Package - previous.network_stat.TX.Package;
+        }
+        return bw;
     }
 }
 
@@ -163,7 +209,10 @@ class Resources {
         const cores = this.resourcesInfos[this.resourcesInfos.length - 1].cpu_percentage.cores.map(x => x.usage);
         const request = this.resourcesInfos.map(x => x.user_package_total.request);
         const response = this.resourcesInfos.map(x => x.user_package_total.response);
-        return {cpu: cpu_data, cores: cores, request: request, response: response}
+        const memory = this.resourcesInfos.map(x => x.memoryUsage);
+        const bandwidth_tx = this.resourcesInfos.map(x=> x.network_bandwidth.TX.Bytes);
+        const bandwidth_rx = this.resourcesInfos.map(x=> x.network_bandwidth.RX.Bytes);
+        return {cpu: cpu_data, cores: cores, request: request, response: response, memory:memory,bandwidth_tx:bandwidth_tx, bandwidth_rx:bandwidth_rx }
     }
 
     tick() {

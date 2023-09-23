@@ -297,7 +297,7 @@ CPUCoreObject = function (divId, index){
     this.index = index
     this.circleId ="cpu_core_"+this.index;
    this.initialize=function (){
-       const divStr = `<div class="col-md-3">
+       const divStr = `<div class="col-md-2">
                                 <div class="card text-center">
                                     <div class="m-t-10">
                                         <h4 class="card-title"><i class="fa-solid fa-microchip"></i>  Core ${this.index}</h4>
