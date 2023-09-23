@@ -209,7 +209,7 @@ class Resources {
         const cores = this.resourcesInfos[this.resourcesInfos.length - 1].cpu_percentage.cores.map(x => x.usage);
         const request = this.resourcesInfos.map(x => x.user_package_total.request);
         const response = this.resourcesInfos.map(x => x.user_package_total.response);
-        const memory = this.resourcesInfos.map(x => x.memoryUsage);
+        const memory = this.resourcesInfos.map(x => parseInt(100 * (x.totalmem - x.freemem) / x.totalmem));
         const bandwidth_tx = this.resourcesInfos.map(x=> x.network_bandwidth.TX.Bytes);
         const bandwidth_rx = this.resourcesInfos.map(x=> x.network_bandwidth.RX.Bytes);
         return {cpu: cpu_data, cores: cores, request: request, response: response, memory:memory,bandwidth_tx:bandwidth_tx, bandwidth_rx:bandwidth_rx }
