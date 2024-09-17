@@ -10,7 +10,7 @@ module.exports=function (FogEtex) {
     io.users = {}
     io.ui_clients = {'Home':[]}
     io.fog_children={}
-    io.process_master = null;
+    io.process_master = {};
     io.users_package = {}
     io.users_package_buffer={}
 
@@ -28,7 +28,7 @@ module.exports=function (FogEtex) {
         socket.DeviceType= parseInt(socket.handshake.query.DeviceType || Config.DeviceTypes.User);
         console.log(Config.DeviceTypes.GetDeviceName(socket.DeviceType)+" connected");
 
-        if(socket.DeviceType==Config.DeviceTypes.Broker){
+        if(socket.DeviceType===Config.DeviceTypes.Broker){
             io.fog_children[socket.id] = { DeviceInfo: null, FogBusy: true, ResourceInfos:[], Children:{}}
 
             socket.on('device_info', (device_info)=>{
@@ -87,7 +87,7 @@ module.exports=function (FogEtex) {
 
         }
 
-        if(socket.DeviceType==Config.DeviceTypes.Worker){
+        if(socket.DeviceType===Config.DeviceTypes.Worker){
             io.fog_children[socket.id] = { DeviceInfo: null, Busy:true, ResourceInfos:[]}
 
             socket.on('device_info', (device_info)=>{
@@ -122,15 +122,15 @@ module.exports=function (FogEtex) {
             });
         }
 
-        if(socket.DeviceType == Config.DeviceTypes.ProcessMaster){
-            io.process_master = socket;
+        if(socket.DeviceType === Config.DeviceTypes.ProcessMaster){
+            io.process_master[socket.id] = socket;
 
             socket.on("disconnect", (reason) => {
                 console.log("Process master disconnected " + reason);
                 for(var key in io.users ){
                     io.users[key].emit("application_disconnected", true);
                 }
-                io.process_master = null;
+                delete io.process_master[socket.id];
             });
 
             //msg -> userid;status -> 12|1  or 12|1;AppNotCreate
@@ -168,16 +168,18 @@ module.exports=function (FogEtex) {
 
         }
 
-        if(socket.DeviceType==Config.DeviceTypes.User){
+        if(socket.DeviceType===Config.DeviceTypes.User){
             //If client is User, get small id to decrease communication message
             socket.userId = io.GetCandidateUserId();
+            const keys = Object.keys(io.process_master);
+            socket.PMId = keys[parseInt(socket.userId)%keys.length]
 
             socket.on("disconnect", (reason) => {
                 console.log("User disconnected " + reason)
 
                 if (io.users[socket.userId]) {
-                    if (io.process_master) {
-                        io.process_master.emit("user_disconnected", socket.id)
+                    if (io.process_master[socket.PMId]) {
+                        io.process_master[socket.PMId].emit("user_disconnected", socket.id)
                     }
                     delete io.users[socket.userId]
                 }
@@ -186,7 +188,7 @@ module.exports=function (FogEtex) {
             socket.on("sensor_data", (msg) => {
                 const socket_received = microtime.nowDouble();
                 const message = `${socket.userId}|${msg}|${socket_received}`;
-                io.process_master.emit("sensor_data", message);
+                io.process_master[socket.PMId].emit("sensor_data", message);
                 if (!io.users_package[socket.userId]) {
                     io.users_package[socket.userId] = {request: 1, response: 0}
                 } else {
@@ -199,8 +201,8 @@ module.exports=function (FogEtex) {
             socket.on("app_info", (user_index) => {
                 io.users[socket.userId] = socket;
                 socket.user_index = user_index;
-                if (io.process_master) {
-                    io.process_master.emit("new_user", socket.userId+"|"+socket.id);
+                if (io.process_master[socket.PMId]) {
+                    io.process_master[socket.PMId].emit("new_user", socket.userId+"|"+socket.id);
                 } else {
                     socket.emit("process_ready", "0;Master is not ready");
                 }
@@ -213,7 +215,7 @@ module.exports=function (FogEtex) {
 
         }
 
-        if(socket.DeviceType==Config.DeviceTypes.ExternalUser){
+        if(socket.DeviceType===Config.DeviceTypes.ExternalUser){
             //If client is User, get small id to decrease communication message
             socket.userId = io.GetCandidateUserId();
             //If client is User, get small id to decrease communication message
@@ -252,7 +254,7 @@ module.exports=function (FogEtex) {
 
         }
 
-        if(socket.DeviceType==Config.DeviceTypes.UserInterface){
+        if(socket.DeviceType===Config.DeviceTypes.UserInterface){
             socket.Directory = socket.handshake.query.Directory;
             socket.join('ui');
             socket.join('ui');
@@ -261,7 +263,7 @@ module.exports=function (FogEtex) {
             }
             io.ui_clients[socket.Directory].push(socket);
 
-            if(socket.Directory=='Home'){
+            if(socket.Directory==='Home'){
                 socket.emit('bulk_data', FogEtex.ResourceManager.GetBulkData());
             }
 
@@ -271,7 +273,7 @@ module.exports=function (FogEtex) {
                     io.ui_clients[socket.Directory].splice(ui_index, 1);
                     console.log(socket.Directory + " element removed from ui clients.")
                     //Delete array if all clients is disconnected.
-                    if(socket.Directory!='Home' && io.ui_clients[socket.Directory].length==0){
+                    if(socket.Directory!=='Home' && io.ui_clients[socket.Directory].length===0){
                         delete io.ui_clients[socket.Directory];
                     }
                 }

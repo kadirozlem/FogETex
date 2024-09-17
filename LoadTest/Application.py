@@ -2,7 +2,7 @@ import os
 import sys
 
 current = os.path.dirname(os.path.realpath(__file__))
-parent_directory = os.path.dirname(current) + "\\GaitAnalysis"
+parent_directory = os.path.dirname(current) + "/GaitAnalysis"
 sys.path.insert(1, parent_directory)
 
 import gait_analysis

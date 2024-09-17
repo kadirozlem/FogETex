@@ -48,11 +48,12 @@ class ResultWriter:
     ThreadTimeInfo = {}
     ThreadInformations = {}
     ResourceInfo = {}
+    Thread_Count =""
 
     def __init__(self):
         ResultWriter.Obj = self
         self.directory = Configuration.FileDirectory + datetime.datetime.today().strftime(
-            '%Y_%m_%d___%H_%M_%S') + Configuration.FilePostfix + "/"
+            '%Y_%m_%d___%H_%M_%S_') + Configuration.FilePostfix + ResultWriter.Thread_Count+"/"
         os.makedirs(self.directory, exist_ok=True)
         self.timer = SetInterval(Configuration.FileWritePeriod, self.TimerEvent)
 
@@ -452,12 +453,20 @@ class ResourceInformation(Thread):
 
 
 def Main():
+    thread_count = None
+    if len(sys.argv) > 1:
+        thread_count = int(sys.argv[1])
+        ResultWriter.Thread_Count = "_" + str(thread_count)
+
     rw = ResultWriter()
     g = geocoder.ip('me')
     FogTester.Latitude, FogTester.Longitude = [str(x) for x in g.latlng]
     index = 0
+
+
     for server in Configuration.Servers:
-        for i in range(server.ThreadCount):
+        T_Count = thread_count if thread_count is not None else server.ThreadCount
+        for i in range(T_Count):
             thread = FogTester(str(index), server, GaitAnalysis, Configuration.ApplicationTestType)
             thread.start()
             FogTester.threads.append(thread)

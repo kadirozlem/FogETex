@@ -26,6 +26,7 @@ router.get('/', function (req, res, next) {
         DeviceInfo: FogETex.DeviceInfo,
         DeviceTypes: Config.DeviceTypes,
         FogChildren: FogChildren,
+        ConnectedMaster : Object.keys(FogETex.Socket.process_master).length,
         Directory: 'Home'
     })
 });

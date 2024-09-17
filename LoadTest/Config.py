@@ -71,16 +71,18 @@ class TestType(Enum):
 class Configuration:
     SendAllDataTimes = 1
     FileWritePeriod = 5
-    TestDataLength = 300 #18000
+    TestDataLength = 18000 #300 #18000
     SamplingPeriod = 0.020
     FileDirectory = "./Results/"
     FilePostfix = "Test"
-    ApplicationTestType = TestType.Cloud
+    ApplicationTestType = TestType.Worker
 
 
 Configuration.Servers = [
-    ServerInformation(ip='164.92.168.129', worker_port='27592', resource_port='17796', thread_count=1, is_secure=False)
+    #ServerInformation(ip='164.92.168.129', worker_port='27592', resource_port='17796', thread_count=1, is_secure=False)
     #ServerInformation(ip='192.168.2.125', worker_port='27592', resource_port='17796', thread_count=1, is_secure=False)
 
-    #ServerInformation(ip='192.168.2.151', worker_port='27592', resource_port='17796', thread_count=1, is_secure=False)
+#    ServerInformation(ip='192.168.2.151', worker_port='27592', resource_port='17796', thread_count=1, is_secure=False)
+    ServerInformation(ip='127.0.0.1', worker_port='27592', resource_port='17796', thread_count=1, is_secure=False)
+
 ]

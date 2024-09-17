@@ -188,3 +188,5 @@ Config/DeviceType.cache
 
 #Remove Test Results
 UserPackage
+
+.DS_Store

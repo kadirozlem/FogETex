@@ -83,7 +83,23 @@ class ResourceInfo {
                     Package: parseInt(response[3]) + parseInt(response[5])
                 }
             }
-        } else {
+        } else if (config.IsMacOS) {
+            let response = childprocess.execSync('netstat -ib | grep en0 | head -1').toString().trim().split(/\s+/)
+            return {
+                RX: {
+                    Bytes: parseInt(response[4]),
+                    Package: parseInt(response[6])
+                },
+                TX: {
+                    Bytes: parseInt(response[7]),
+                    Package: parseInt(response[9])
+                }
+            }
+        }
+
+
+
+        else {
             let response = childprocess.execSync('cat /sys/class/net/eth0/statistics/rx_bytes '
                 +'&& cat /sys/class/net/eth0/statistics/rx_packets '
                 +'&& cat /sys/class/net/eth0/statistics/tx_bytes '
