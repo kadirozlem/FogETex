@@ -190,3 +190,4 @@ Config/DeviceType.cache
 UserPackage
 
 .DS_Store
+*.bat
