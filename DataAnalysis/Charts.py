@@ -364,6 +364,118 @@ class Charts:
             plt.show()
         Charts.ClearFigure()
 
+    @staticmethod
+    def GroupedBoxSimple(data, x_title, y_title, directory, filename, func=statistics.median, showBoxPlot=False,
+                         ylim=None, legend_loc='best'):
+
+        labels = ['Worker\n(Wi-Fi)', 'Broker\n(Wi-Fi)', 'Cloud\n(Wi-Fi)', 'Worker\n(LTE)', 'Cloud\n(LTE)']
+        actual_client_median = mock_client_wifi_median = [0, 0, 0, 0]
+        if Configuration.ShowBar:
+            actual_client_median = [
+                func(data['ActualClient']['Worker']),
+                func(data['ActualClient']['Broker']),
+                func(data['ActualClient']['Cloud']),
+                func(data['ActualClient']['LTE']),
+                func(data['ActualClient']['LTE_Cloud'])
+            ]
+            mock_client_wifi_median = [
+                func(data['MockClient']['Worker_WiFi']),
+                func(data['MockClient']['Broker_WiFi']),
+                func(data['MockClient']['Cloud_WiFi']),
+                func(data['MockClient']['LTE']),
+                func(data['MockClient']['LTE_Cloud'])
+            ]
+
+        x = np.arange(len(labels))  # the label locations
+        width = 0.30  # the width of the bars
+
+        fig, ax = plt.subplots()
+        rects1 = ax.bar(x - width / 2, mock_client_wifi_median, width, label='Mock Client',
+                        color=Charts.ColorPalette[1])
+        rects2 = ax.bar(x + width / 2, actual_client_median, width, label='Actual Client', color=Charts.ColorPalette[0])
+
+        if showBoxPlot:
+            actual_client_data = [data['ActualClient']['Worker'],
+                                  data['ActualClient']['Broker'], data['ActualClient']['Cloud'],
+                                  data['ActualClient']['LTE'], data['ActualClient']['LTE_Cloud']]
+
+            wifi_data = [
+                data['MockClient']['Worker_WiFi'],
+                data['MockClient']['Broker_WiFi'],
+                data['MockClient']['Cloud_WiFi'],
+                data['MockClient']['LTE'],
+                data['MockClient']['LTE_Cloud']
+            ]
+            box1 = ax.boxplot(wifi_data, widths=width, positions=x - width / 2, showfliers=False,
+                              showbox=Configuration.ShowBox, patch_artist=True)
+            box2 = ax.boxplot(actual_client_data, widths=width, positions=x + width / 2, showfliers=False,
+                              showbox=Configuration.ShowBox, patch_artist=True)
+
+            plt.setp(box1["boxes"], facecolor=Charts.ColorPalette[2])
+            plt.setp(box2["boxes"], facecolor=Charts.ColorPalette[1])
+            color = 'violet'
+
+            plt.setp(box1["medians"], color=color)
+            plt.setp(box2["medians"], color=color)
+            plt.setp(box1["whiskers"], color=color)
+            plt.setp(box2["whiskers"], color=color)
+            plt.setp(box1["caps"], color=color)
+            plt.setp(box2["caps"], color=color)
+
+        if ylim is not None:
+            ax.set_ylim(ylim)
+
+        Charts.autolabel(rects1, ax)
+        Charts.autolabel(rects2, ax)
+
+        # Add some text for labels, title and custom x-axis tick labels, etc.
+        ax.set_ylabel(y_title)
+        ax.set_xticks(x)
+        ax.set_xticklabels(labels)
+        ax.legend(loc=legend_loc)
+
+        fig.tight_layout()
+        if Configuration.Save:
+            Charts.SaveFigure(plt, directory, filename)
+        else:
+            plt.show()
+        Charts.ClearFigure()
+
+    @staticmethod
+    def StressTestLines(data, x_title, y_title, directory, filename, func=statistics.mean, showBoxPlot=False,
+                         ylim=None, legend_loc='best'):
+        labels = ["Worker (Wi-Fi)", "Broker (Wi-Fi)", "Cloud (Wi-Fi)","Worker (LTE)", "Cloud (LTE)"]
+        device_keys = ["Worker","Broker","Cloud","LTE","LTE_Cloud"]
+        fig, ax = plt.subplots()
+        counter = -1
+        for i in range(0, len(device_keys)):
+            device_dict = data.get(device_keys[i])
+            if device_dict is not None:
+                counter+=1
+                x_axis = sorted([int(x) for x in device_dict.keys()])
+                y_mean = np.array([statistics.mean(device_dict[str(x)]) for x in x_axis])
+                y_std = np.array([statistics.stdev(device_dict[str(x)]) for x in x_axis])
+
+                quartiles = np.array([statistics.quantiles(device_dict[str(x)]) for x in x_axis])
+                q1 = quartiles[:,0]
+                q3 = quartiles[:,2]
+                iqr = q3-q1
+
+
+
+                ax.plot(x_axis, y_mean, label=labels[i], lw=2, color=Charts.ColorPalette[i])
+                #ax.fill_between(x_axis, q1-iqr*1.5, q3+iqr*1.5, alpha=0.4, facecolor=Charts.ColorPalette[i])
+                ax.fill_between(x_axis, y_mean-y_std, y_mean+y_std, alpha=0.4, facecolor=Charts.ColorPalette[i])
+
+        ax.legend(loc=legend_loc)
+        ax.set_ylim([-20,100])
+        fig.tight_layout()
+        if Configuration.Save:
+            Charts.SaveFigure(plt, directory, 'Stress_'+filename)
+        else:
+            plt.show()
+        Charts.ClearFigure()
+
 
     @staticmethod
     def WriteLineGraphData(value_arrays, headers, directory, filename):

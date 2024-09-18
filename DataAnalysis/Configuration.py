@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 @dataclass
 class Configuration:
-    Save = True
+    Save = False
     StartIndex = 0
     FullDataSize = 15000
     ResourceStartIndex = 10

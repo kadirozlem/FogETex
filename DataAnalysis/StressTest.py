@@ -117,49 +117,27 @@ class RequestTime:
 
 
 class FogAnalysis:
-    TestTypes = {
-        "ActualClient": ["WiFi", "LTE", "Worker", "Broker", "Cloud", "LTE_Cloud"],
-        "MockClient": [ "WiFi", "LTE",  "Worker_WiFi",
-                       "Broker_WiFi", "Cloud_WiFi","LTE_Cloud"]
-    }
-
     TestResults = {
-        "ActualClient": {},
-        "MockClient": {}
     }
 
     @staticmethod
     def WriteTestResults(name="TestResults"):
         os.makedirs('./Cache/', exist_ok=True)
-        json.dump(FogAnalysis.TestResults, open('./Cache/' + name + '.json', "w"))
+        json.dump(FogAnalysis.TestResults, open('./Cache/Stress_' + name + '.json', "w"))
 
     @staticmethod
     def ReloadTestResult(name="TestResults"):
-        if os.path.exists('./Cache/' + name + '.json'):
-            FogAnalysis.TestResults = json.load(open('./Cache/' + name + '.json'))
+        if os.path.exists('./Cache/Stress_' + name + '.json'):
+            FogAnalysis.TestResults = json.load(open('./Cache/Stress_' + name + '.json'))
             return True
         return False
 
     @staticmethod
-    def CheckFiles(functionName, full=True, short=True):
+    def CheckFiles(functionName):
+        print("StressTest Analysis Started.")
 
-        for TestDeviceName in FogAnalysis.TestTypes:
-            print("########################################")
-            print(TestDeviceName + " Analysis Started.")
+        functionName("/StressTest/")
 
-            testTypes = FogAnalysis.TestTypes[TestDeviceName]
-            counter = 1
-            typeLength = len(testTypes)
-            for testType in testTypes:
-                print("[" + str(counter) + "/" + str(typeLength) + "]: " + testType)
-                # Execute Function
-                if short:
-                    print('Short Data Analysis Started')
-                    functionName(TestDeviceName + '/' + testType + '/Short/')
-                if full:
-                    print('Full Data Analysis Started')
-                    functionName(TestDeviceName + '/' + testType + '/Full/')
-                counter += 1
 
     @staticmethod
     def CheckThreadInformationExists(directory):
@@ -192,9 +170,8 @@ class FogAnalysis:
 
     @staticmethod
     def CheckTimeInformationSize(directory):
-        limit = 100
-        if directory.endswith("/Full/"):
-            limit = 17000
+        limit = 17000
+
         not_res_limit = 200
         folders = FileOperations.GetFolders(directory)
         folder_count = len(folders)
@@ -260,9 +237,7 @@ class FogAnalysis:
 
     @staticmethod
     def DrawTimeInformationEachTestGroup(directory):
-        limit = 100
-        if directory.endswith("/Full/"):
-            limit = 17000
+        limit = 17000
         not_res_limit = 200
         folders = FileOperations.GetFolders(directory)
         folder_count = len(folders)
@@ -303,43 +278,45 @@ class FogAnalysis:
 
     @staticmethod
     def AddAllDataToDictionary(directory):
-        limit = 100
-        if directory.endswith("/Full/"):
-            limit = 17000
+        limit = 17000
         not_res_limit = 200
         folders = FileOperations.GetFolders(directory)
         folder_count = len(folders)
 
         counter = 1
+
         test_results = []
         for folder in folders:
-            if counter > Configuration.TestCount:
-                break
-
+            splitted_name = folder.split("_")
+            test_name = splitted_name[-1]
+            device_name = splitted_name[-2]
+            if FogAnalysis.TestResults.get(device_name) is None:
+                FogAnalysis.TestResults[device_name] = {}
+            if FogAnalysis.TestResults.get(device_name).get(test_name) is None:
+                FogAnalysis.TestResults[device_name][test_name] = []
             test_path = directory + folder
             files = FileOperations.GetFiles(test_path)
             TimeInformation = [x for x in files if x.endswith('.csv') and "ThreadInformation" not in x]
-            if len(TimeInformation) != 0:
-                responded_request, candidate_request, requests = FogAnalysis.ReadTimeInformationFile(test_path,
+
+            if len(TimeInformation) == int(test_name):
+                for time_info in TimeInformation:
+                    responded_request, candidate_request, requests = FogAnalysis.ReadTimeInformationFile(test_path,
                                                                                                      TimeInformation[0])
+
+                    if len(requests) > 0:
+                        print(f"[{counter}/{folder_count}]: Size: {len(requests)} -- {folder}-{time_info}")
+                        requests.sort(key=lambda x: x.index)
+
+                        values = [getattr(x, Configuration.AttributeName) * 1000 for x in requests if x.Result != "-1"][
+                                 Configuration.StartIndex:Configuration.StartIndex + Configuration.FullDataSize]
+                        FogAnalysis.TestResults[device_name][test_name].extend(values)
+                    else:
+                        print(f"[{counter}/{folder_count}]: {folder}")
+
 
             else:
                 Print.AddError("Time information is not found " + test_path)
-            if len(requests) > 0:
-                print(f"[{counter}/{folder_count}]: Size: {len(requests)} -- {folder}")
-                requests.sort(key=lambda x: x.index)
-
-                values = [getattr(x, Configuration.AttributeName) * 1000 for x in requests if x.Result != "-1"][
-                         Configuration.StartIndex:Configuration.StartIndex + Configuration.FullDataSize]
-                test_results.extend(values)
-            else:
-                print(f"[{counter}/{folder_count}]: {folder}")
-
             counter += 1
-
-        test_names = directory.replace('/Full/', "").split('/')
-        FogAnalysis.TestResults[test_names[-2]][test_names[-1]] = test_results
-
     @staticmethod
     def ProcessResourceRecord(record, start_time):
         timestamp = record["timestamp"]
@@ -434,8 +411,6 @@ class FogAnalysis:
     def AddArbitrationTimeToDictionary(directory):
 
         limit = 25
-        if directory.endswith("/Full/"):
-            limit = 7
 
         folders = FileOperations.GetFolders(directory)
 
@@ -494,12 +469,12 @@ class FogAnalysis:
         Configuration.AttributeName = filename
 
         if not FogAnalysis.ReloadTestResult(Configuration.AttributeName):
-            FogAnalysis.CheckFiles(FogAnalysis.AddAllDataToDictionary, short=False)
+            FogAnalysis.CheckFiles(FogAnalysis.AddAllDataToDictionary)
             FogAnalysis.WriteTestResults(Configuration.AttributeName)
 
         ylim_box=(0,225)
 
-        Charts.GroupedBoxSimple(FogAnalysis.TestResults, None, y_title, directory, filename + "_Mean_SimpleBox",
+        Charts.StressTestLines( FogAnalysis.TestResults, None, y_title, directory, filename + "_Mean_SimpleBox",
                                 showBoxPlot=True, func=statistics.mean,ylim=ylim_box)
 
     @staticmethod
@@ -515,19 +490,18 @@ class FogAnalysis:
         Configuration.AttributeName = filename
 
         if not FogAnalysis.ReloadTestResult(Configuration.AttributeName):
-            FogAnalysis.CheckFiles(FogAnalysis.AddAllDataToDictionary, short=False)
+            FogAnalysis.CheckFiles(FogAnalysis.AddAllDataToDictionary)
             FogAnalysis.WriteTestResults(Configuration.AttributeName)
 
         ylim_box = (0, 8)
 
-        Charts.GroupedBoxSimple(FogAnalysis.TestResults, None, y_title, directory, filename + "_Mean_SimpleBox",
+        Charts.StressTestLines(FogAnalysis.TestResults, None, y_title, directory, filename + "_Mean_SimpleBox",
                                 showBoxPlot=True, func=statistics.mean, ylim=ylim_box)
 
     @staticmethod
     def PlotLatencyTime():
         FogAnalysis.TestResults = {
-            "ActualClient": {},
-            "MockClient": {}
+
         }
         y_title = "Mean Latency [ms]"
         directory = FileOperations.ProcessedResults + "Latency/"
@@ -536,19 +510,18 @@ class FogAnalysis:
         Configuration.AttributeName = filename
 
         if not FogAnalysis.ReloadTestResult(Configuration.AttributeName):
-            FogAnalysis.CheckFiles(FogAnalysis.AddAllDataToDictionary, short=False)
+            FogAnalysis.CheckFiles(FogAnalysis.AddAllDataToDictionary)
             FogAnalysis.WriteTestResults(Configuration.AttributeName)
 
         ylim_box = (0, 120)
 
-        Charts.GroupedBoxSimple(FogAnalysis.TestResults, None, y_title, directory, filename + "_Mean_SimpleBox",
+        Charts.StressTestLines(FogAnalysis.TestResults, None, y_title, directory, filename + "_Mean_SimpleBox",
                                 showBoxPlot=True, func=statistics.mean, ylim=ylim_box)
 
     @staticmethod
     def PlotQueuingDelayTime():
         FogAnalysis.TestResults = {
-            "ActualClient": {},
-            "MockClient": {}
+
         }
         y_title = "Mean Queuing Delay [ms]"
         directory = FileOperations.ProcessedResults + "QueuingDelay/"
@@ -557,19 +530,18 @@ class FogAnalysis:
         Configuration.AttributeName = filename
 
         if not FogAnalysis.ReloadTestResult(Configuration.AttributeName):
-            FogAnalysis.CheckFiles(FogAnalysis.AddAllDataToDictionary, short=False)
+            FogAnalysis.CheckFiles(FogAnalysis.AddAllDataToDictionary)
             FogAnalysis.WriteTestResults(Configuration.AttributeName)
 
         ylim_box = (0,25)
 
-        Charts.GroupedBoxSimple(FogAnalysis.TestResults, None, y_title, directory, filename + "_Mean_SimpleBox",
+        Charts.StressTestLines(FogAnalysis.TestResults, None, y_title, directory, filename + "_Mean_SimpleBox",
                                 showBoxPlot=True, func=statistics.mean,ylim=ylim_box)
 
     @staticmethod
     def PlotJitter():
         FogAnalysis.TestResults = {
-            "ActualClient": {},
-            "MockClient": {}
+
         }
         y_title = "Jitter [ms]"
         directory = FileOperations.ProcessedResults + "Jitter/"
@@ -578,19 +550,18 @@ class FogAnalysis:
         Configuration.AttributeName = "ResponseTime"
 
         if not FogAnalysis.ReloadTestResult(Configuration.AttributeName):
-            FogAnalysis.CheckFiles(FogAnalysis.AddAllDataToDictionary, short=False)
+            FogAnalysis.CheckFiles(FogAnalysis.AddAllDataToDictionary)
             FogAnalysis.WriteTestResults(Configuration.AttributeName)
 
         ylim = (0, 30)
 
 
-        Charts.GroupedBoxSimple(FogAnalysis.TestResults, None, y_title, directory, filename + "_StdDev_Simple",
+        Charts.StressTestLines(FogAnalysis.TestResults, None, y_title, directory, filename + "_StdDev_Simple",
                                 func=statistics.stdev, ylim=ylim,legend_loc='upper left')
     @staticmethod
     def PlotCPUMemory_Usage():
         FogAnalysis.TestResults = {
-            "ActualClient": {},
-            "MockClient": {}
+
         }
         y_title = "Mean Usage [%]"
         directory = FileOperations.ProcessedResults + "CPU_Memory_Usage/"
@@ -603,8 +574,7 @@ class FogAnalysis:
         CPU_Results = FogAnalysis.TestResults
 
         FogAnalysis.TestResults = {
-            "ActualClient": {},
-            "MockClient": {}
+
         }
         filename = "Memory_Usage"
         Configuration.AttributeName = filename
@@ -617,15 +587,14 @@ class FogAnalysis:
 
         ylim_box = (0, 30)
 
-        Charts.CPU_Memory_GroupedBoxSimple(CPU_Results, Memory_Results, None, y_title, directory, filename + "_Mean_SimpleBox",
+        Charts.StressTestLines(CPU_Results, Memory_Results, None, y_title, directory, filename + "_Mean_SimpleBox",
                                 showBoxPlot=True, func=statistics.mean, ylim=ylim_box)
 
 
     @staticmethod
     def Plot_Bandwidth():
         FogAnalysis.TestResults = {
-            "ActualClient": {},
-            "MockClient": {}
+
         }
         y_title = "Mean Bandwidth [kbps]"
         directory = FileOperations.ProcessedResults + "Bandwidth/"
@@ -646,8 +615,7 @@ class FogAnalysis:
     @staticmethod
     def PlotArbitrationTime():
         FogAnalysis.TestResults = {
-            "ActualClient": {},
-            "MockClient": {}
+
         }
         y_title = "Mean Arbitration Time [ms]"
         directory = FileOperations.ProcessedResults + "ArbitrationTime/"
@@ -661,13 +629,150 @@ class FogAnalysis:
 
         ylim_box = (0,1000)
 
-        Charts.GroupedBoxSimpleFull(FogAnalysis.TestResults, None, y_title, directory, filename + "_Mean_SimpleBoxFull",
+        Charts.StressTestLines(FogAnalysis.TestResults, None, y_title, directory, filename + "_Mean_SimpleBoxFull",
                                      showBoxPlot=True, func=statistics.mean,ylim=ylim_box)
 
 
+    @staticmethod
+    def CheckTimeValues(directory='/StressTest/'):
+        limit = 17000
+        not_res_limit = 200
+        folders = FileOperations.GetFolders(directory)
+        folder_count = len(folders)
 
+        counter = 1
+
+        folder_results_header =["DeviceName","TestName","Folder","TotalSize","TotalTestSize",
+                         "MinLatency","MaxLatency","MeanLatency","StdLatency",
+                         "MinQueuingDelay","MaxQueuingDelay","MeanQueueingDelay","StdQueueingDelay",
+                         "MinExecutionTime","MaxExecutionTime","MeanExecutionTime","StdExecutionTime",
+                         "MinResponseTime","MaxResponseTime","MeanResponseTime","StdResponseTime"]
+        file_results_header = ["DeviceName","TestName","ThreadName","Folder","TotalSize","TotalTestSize",
+                         "MinLatency","MaxLatency","MeanLatency","StdLatency",
+                         "MinQueuingDelay","MaxQueuingDelay","MeanQueueingDelay","StdQueueingDelay",
+                         "MinExecutionTime","MaxExecutionTime","MeanExecutionTime","StdExecutionTime",
+                         "MinResponseTime","MaxResponseTime","MeanResponseTime","StdResponseTime"]
+
+        folder_results = []
+        file_results = []
+        for folder in folders:
+            splitted_name = folder.split("_")
+            test_name = splitted_name[-1]
+            device_name = splitted_name[-2]
+            if FogAnalysis.TestResults.get(device_name) is None:
+                FogAnalysis.TestResults[device_name] = {}
+            if FogAnalysis.TestResults.get(device_name).get(test_name) is None:
+                FogAnalysis.TestResults[device_name][test_name] = []
+            test_path = directory + folder
+            files = FileOperations.GetFiles(test_path)
+            TimeInformation = [x for x in files if x.endswith('.csv') and "ThreadInformation" not in x]
+
+            if len(TimeInformation) == int(test_name):
+                latency_arr = []
+                queuing_delay_arr = []
+                execution_times_arr=[]
+                response_times_arr=[]
+                total_size = 0
+                total_test_size = 0
+                for time_info in TimeInformation:
+                    responded_request, candidate_request, requests = FogAnalysis.ReadTimeInformationFile(test_path,
+                                                                                                     TimeInformation[0])
+
+                    if len(requests) > 0:
+                        print(f"[{counter}/{folder_count}]: Size: {len(requests)} -- {folder}-{time_info}")
+                        requests.sort(key=lambda x: x.index)
+
+                        values = [x for x in requests if x.Result != "-1"][
+                                 Configuration.StartIndex:Configuration.StartIndex + Configuration.FullDataSize]
+
+                        latency = [x.Latency*1000 for x in values]
+                        min_latency = min(latency)
+                        max_latency = max(latency)
+                        mean_latency = statistics.mean(latency)
+                        std_latency = statistics.stdev(latency)
+                        latency_arr.extend(latency)
+
+                        queuing_delay= [x.QueuingDelay*1000 for x in values]
+                        min_queuing_delay = min(queuing_delay)
+                        max_queuing_delay = max(queuing_delay)
+                        mean_queuing_delay = statistics.mean(queuing_delay)
+                        std_queuing_delay = statistics.stdev(queuing_delay)
+                        queuing_delay_arr.extend(queuing_delay)
+
+
+                        execution_times = [x.ExecutionTime*1000 for x in values]
+                        min_execution_time = min(execution_times)
+                        max_execution_time = max(execution_times)
+                        mean_execution_time = statistics.mean(execution_times)
+                        std_execution_time = statistics.stdev(execution_times)
+                        execution_times_arr.extend(execution_times)
+
+                        response_time = [x.ResponseTime*1000 for x in values]
+                        min_response_time = min(response_time)
+                        max_response_time = max(response_time)
+                        mean_response_time = statistics.mean(response_time)
+                        std_response_time = statistics.stdev(response_time)
+                        response_times_arr.extend(response_time)
+
+                        size = len(requests)
+                        total_size += size
+
+                        test_size = len(values)
+                        total_test_size += test_size
+
+                        file_result = [device_name, test_name, time_info.replace(".csv",""), folder, str(size), str(test_size),
+                            min_latency, max_latency, mean_latency, std_latency,
+                            min_queuing_delay, max_queuing_delay, mean_queuing_delay, std_queuing_delay,
+                            min_execution_time, max_execution_time, mean_execution_time, std_execution_time,
+                            min_response_time, max_response_time, mean_response_time, std_response_time]
+                        file_results.append(file_result)
+                    else:
+                        print(f"[{counter}/{folder_count}]: {folder}")
+
+
+
+
+
+                min_latency = min(latency_arr)
+                max_latency = max(latency_arr)
+                mean_latency = statistics.mean(latency_arr)
+                std_latency = statistics.stdev(latency_arr)
+
+                min_queuing_delay = min(queuing_delay_arr)
+                max_queuing_delay = max(queuing_delay_arr)
+                mean_queuing_delay = statistics.mean(queuing_delay_arr)
+                std_queuing_delay = statistics.stdev(queuing_delay_arr)
+
+                min_execution_time = min(execution_times_arr)
+                max_execution_time = max(execution_times_arr)
+                mean_execution_time = statistics.mean(execution_times_arr)
+                std_execution_time = statistics.stdev(execution_times_arr)
+
+                min_response_time = min(response_times_arr)
+                max_response_time = max(response_times_arr)
+                mean_response_time = statistics.mean(response_times_arr)
+                std_response_time = statistics.stdev(response_times_arr)
+
+
+                folder_result = [device_name, test_name,folder, str(total_size), str(total_test_size),
+                               min_latency, max_latency, mean_latency, std_latency,
+                               min_queuing_delay, max_queuing_delay, mean_queuing_delay, std_queuing_delay,
+                               min_execution_time, max_execution_time, mean_execution_time, std_execution_time,
+                               min_response_time, max_response_time, mean_response_time, std_response_time]
+                folder_results.append(folder_result)
+
+
+
+            else:
+                Print.AddError("Time information is not found " + test_path)
+            counter += 1
+        file_results.sort(key=lambda x: (x[0],int(x[1]),x[3],int(x[2])))
+        folder_results.sort(key=lambda x: (x[0],int(x[1]),x[2]))
+        FileOperations.WriteDataToCSV(file_results,file_results_header,"./StressTestResults/","FileResults")
+        FileOperations.WriteDataToCSV(folder_results,folder_results_header,"./StressTestResults/","FolderResults")
 
 if __name__ == '__main__':
+    #FogAnalysis.CheckTimeValues()
     # FogAnalysis.CheckFiles(FogAnalysis.CheckTimeInformationExists)
     # FogAnalysis.CheckFiles(FogAnalysis.CheckThreadInformationExists)
     # FogAnalysis.CheckFiles(FogAnalysis.CheckTimeInformationSize)
@@ -677,13 +782,13 @@ if __name__ == '__main__':
     # if not FogAnalysis.ReloadTestResult():
     #     FogAnalysis.CheckFiles(FogAnalysis.AddAllDataToDictionary, short=False)
     #     FogAnalysis.WriteTestResults()
-    FogAnalysis.PlotLatencyTime()
-    FogAnalysis.PlotExecutionTime()
-    FogAnalysis.PlotQueuingDelayTime()
+    #FogAnalysis.PlotLatencyTime()
+    #FogAnalysis.PlotExecutionTime()
+    #FogAnalysis.PlotQueuingDelayTime()
     FogAnalysis.PlotResponseTime()
-    FogAnalysis.PlotJitter()
-    FogAnalysis.Plot_Bandwidth()
-    FogAnalysis.PlotArbitrationTime()
-    FogAnalysis.PlotCPUMemory_Usage()
+    #FogAnalysis.PlotJitter()
+    #FogAnalysis.Plot_Bandwidth()
+    #FogAnalysis.PlotArbitrationTime()
+    #FogAnalysis.PlotCPUMemory_Usage()
 
     Print.WriteErrors()

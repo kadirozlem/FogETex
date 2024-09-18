@@ -70,7 +70,7 @@ class SingleThreadProcess:
         def sensor_data(data):
             user_id, dataIndex, data, socket_received = data.split('|')
             added_queue = now()
-            self.queue.append(SensorData(user_id, dataIndex, data, socket_received, added_queue))
+            self.queue.appendleft(SensorData(user_id, dataIndex, data, socket_received, added_queue))
 
         while True:
             try:

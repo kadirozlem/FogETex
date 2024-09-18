@@ -20,9 +20,14 @@ class FileOperations:
 
     @staticmethod
     def GetFiles(directory):
-        files = os.listdir(FileOperations.ResultDirectory + directory)
+        candidate_files = os.listdir(FileOperations.ResultDirectory + directory)
+        files = [x for x in candidate_files if not x.startswith('.')]
         return files
-
+    @staticmethod
+    def GetFolders(directory):
+        canditate_folders = os.listdir(FileOperations.ResultDirectory + directory)
+        folders = [x for x in canditate_folders if os.path.isdir(FileOperations.ResultDirectory + directory+x+'/')]
+        return folders
     @staticmethod
     def CreateFolder(directory):
         os.mkdir(FileOperations.ProcessedResults + directory)
